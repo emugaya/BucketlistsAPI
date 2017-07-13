@@ -4,7 +4,7 @@ class Config(object):
     """
     DEBUG = False
     TESTING = False
-    DATABASE_URI = 'sqlite://:memory:'
+    SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:app'
 
 class ProductionConfig(Config):
 
