@@ -1,5 +1,5 @@
 from app import db
-
+# from datetime import datetime, date
 # class User(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
 #     username = db.Column(db.String(80), unique=True)
@@ -29,6 +29,11 @@ from app import db
 #     def __repr__(self):
 #         return '<User %r>' % self.username
 #
+def dump_datetime(value):
+    """Deserialize datetime object into string form for JSON processing."""
+    if value is None:
+        return None
+    return (value.strftime("%Y-%m-%d") +" "+ value.strftime("%H:%M:%S"))
 
 class Bucketlist(db.Model):
     """This class represents the bucketlist table."""
@@ -48,17 +53,26 @@ class Bucketlist(db.Model):
         """initialize with name."""
         self.name = name
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'date_created' : dump_datetime(self.date_created),
+            'date_modified' : dump_datetime(self.date_modified)
+        }
 
-    @staticmethod
-    def get_all():
-        return Bucketlist.query.all()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+    def serialize_id(self, item):
+        """Return object data in easily serializeable format"""
+        #self. item = b_items
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'items' : item,
+            'date_created' : dump_datetime(self.date_created),
+            'date_modified' : dump_datetime(self.date_modified)
+        }
 
     def __repr__(self):
         return "<Bucketlist: {}>".format(self.name)
@@ -77,21 +91,21 @@ class Item(db.Model):
     done = db.Column(db.Boolean)
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
 
-    def __init__(self, name):
-        """initialize with name."""
+    def __init__(self, name, bucketlist_id):
         self.name = name
+        self.bucketlist_id = bucketlist_id
+        self.done = False
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
-
-    @staticmethod
-    def get_all():
-        return Bucketlist.query.all()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'date_created' : dump_datetime(self.date_created),
+            'date_modified' : dump_datetime(self.date_modified),
+            'done' : self.done,
+        }
 
     def __repr__(self):
         return "<Item: {}>".format(self.name)
