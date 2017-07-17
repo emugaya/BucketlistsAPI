@@ -9,6 +9,7 @@ api = Api(apiv2_blueprint, title='My Title',version='2.0',description='A descrip
 )
 from .apis.auth import api as ns1
 api.add_namespace(ns1)
+
 @api.route('/hello')
 class HelloUganda(Resource):
     def get(self):
