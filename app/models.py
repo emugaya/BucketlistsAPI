@@ -1,33 +1,35 @@
 from app import db
-# from datetime import datetime, date
-# class User(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     username = db.Column(db.String(80), unique=True)
-#     password = db.Column('password', db.String(20))
-#     date_created = db.Column(db.DateTime)
-#     date_modified =db.Column(db.DateTime)
-#     # bucketlists = db.relationship('BuckelList', backref='author', lazy='dynamic')
-#
-#     def __init__(self , username ,password):
-#         self.username = username
-#         self.password = password
-#         self.date_created = datetime.utcnow()
-#         self.date_modified = datetime.utcnow()
-#
-#     def is_authenticated(self):
-#         return True
-#
-#     def is_active(self):
-#         return True
-#
-#     def is_anonymous(self):
-#         return False
-#
-#     def get_id(self):
-#         return unicode(self.id)
-#
-#     def __repr__(self):
-#         return '<User %r>' % self.username
+
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True)
+    password = db.Column('password', db.String(20))
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(
+        db.DateTime, default=db.func.current_timestamp(),
+        onupdate=db.func.current_timestamp())
+
+    def __init__(self , username ,password):
+        self.username = username
+        self.password = password
+        self.date_created = datetime.utcnow()
+        self.date_modified = datetime.utcnow()
+
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return unicode(self.id)
+
+    def __repr__(self):
+        return '<User %r>' % self.username
 #
 def dump_datetime(value):
     """Deserialize datetime object into string form for JSON processing."""
@@ -88,7 +90,7 @@ class Item(db.Model):
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
-    done = db.Column(db.Boolean)
+    done = db.Column(db.Boolean, default=False)
     bucketlist_id = db.Column(db.Integer, db.ForeignKey('bucketlists.id'))
 
     def __init__(self, name, bucketlist_id):

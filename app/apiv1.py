@@ -3,7 +3,7 @@ from flask_restplus import Api, Resource, fields
 
 # api = Api(blueprint)
 apiv1_blueprint = Blueprint('apiv1', __name__, url_prefix='/api/v1')
-api = Api(apiv1_blueprint, title='Bucket Application API',version='1.0',
+api = Api(apiv1_blueprint, title='Bucket List Application API',version='1.0',
 description="An API to manage bucket lists and their respective items"
 # All API metadatas
         )
