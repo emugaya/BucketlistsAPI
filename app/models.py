@@ -1,36 +1,52 @@
 from app import db
+from flask import g
+from passlib.apps import custom_app_context as pwd_context
+from flask_login import LoginManager, UserMixin
+import jwt
+
+import datetime
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
 
 
-class User(db.Model):
+SECRET_KEY = 'Some_long_text_here'
+class User(db.Model, UserMixin):
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
-    password = db.Column('password', db.String(20))
+    password_hash = db.Column(db.String(128))
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
+    buckets= db.relationship('Bucketlist', backref='users', lazy='dynamic')
 
-    def __init__(self , username ,password):
+    def __init__(self , username):
         self.username = username
-        self.password = password
-        self.date_created = datetime.utcnow()
-        self.date_modified = datetime.utcnow()
 
-    def is_authenticated(self):
-        return True
+    def hash_password(self, password):
+        self.password_hash = pwd_context.encrypt(password)
 
-    def is_active(self):
-        return True
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.password_hash)
 
-    def is_anonymous(self):
-        return False
+    def generate_auth_token(self, expiration = 600):
+        s = Serializer(SECRET_KEY, expires_in = expiration)
+        return s.dumps({ 'id': self.id })
 
-    def get_id(self):
-        return unicode(self.id)
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(SECRET_KEY)
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None # valid token, but expired
+        except BadSignature:
+            return None # invalid token
+        user = User.query.get(data['id'])
+        return user
 
-    def __repr__(self):
-        return '<User %r>' % self.username
-#
+
 def dump_datetime(value):
     """Deserialize datetime object into string form for JSON processing."""
     if value is None:
@@ -48,12 +64,13 @@ class Bucketlist(db.Model):
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
-    # created_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
     items= db.relationship('Item', backref='bucketlists', lazy='dynamic')
 
-    def __init__(self, name):
+    def __init__(self, name, created_by):
         """initialize with name."""
         self.name = name
+        self.created_by = created_by
 
     @property
     def serialize(self):
@@ -62,7 +79,8 @@ class Bucketlist(db.Model):
             'id' : self.id,
             'name' : self.name,
             'date_created' : dump_datetime(self.date_created),
-            'date_modified' : dump_datetime(self.date_modified)
+            'date_modified' : dump_datetime(self.date_modified),
+            'created_by' : self.created_by
         }
 
     def serialize_id(self, item):
@@ -73,7 +91,8 @@ class Bucketlist(db.Model):
             'name' : self.name,
             'items' : item,
             'date_created' : dump_datetime(self.date_created),
-            'date_modified' : dump_datetime(self.date_modified)
+            'date_modified' : dump_datetime(self.date_modified),
+            'created_by': self.created_by
         }
 
     def __repr__(self):
