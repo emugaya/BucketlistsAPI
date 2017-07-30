@@ -4,6 +4,7 @@ import os
 from flask import Flask, jsonify
 from flask_restplus import reqparse, abort, Api, Resource
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
 
 from config import app_config
 
@@ -13,6 +14,8 @@ db = SQLAlchemy()
 def create_app(config_name):
     app = Flask(__name__,instance_relative_config=True)
     # config_name = os.getenv('APP_SETTINGS')
+    login_manager = LoginManager()
+    login_manager.init_app(app)
     app.config.from_object('config')
     app.config.from_object(app_config[config_name])
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
