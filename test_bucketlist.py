@@ -10,7 +10,9 @@ class BucketlistTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app(config_name="testing")
         self.client = self.app.test_client
-        self.bucketlist = {"name": "Apply to Andela"}
+        # self.bucketlist = {"name": "Apply to Andela"}
+        self.token = ''
+        self.bucketlist = {'name': "Join Andela"}
         self.bucketlist_1 = {"name" :"Join Andela Uganda"}
         self.bucketlist_2 = {"name" : "Attend Orientation and P&C Clinic"}
         self.bucketlist_item1 = {"item_name": "Apply and Pass Plum test",
@@ -35,6 +37,8 @@ class BucketlistTestCase(unittest.TestCase):
         #Variable for updating item name
         self.item_name_new = {"item_name" : "Complete Bootcamp CP1, Make presentation and Get selected"}
         # binds the app to the current context
+        self.user_registration = {"username" : "emugaya",
+                                  "password" : "Jinja@1234"}
         with self.app.app_context():
             # create all tables
             db.create_all()
@@ -53,15 +57,18 @@ class BucketlistTestCase(unittest.TestCase):
         pass
     def test_user_registration(self):
         """ Test user can register a user. """
-        pass
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        self.assertEqual(res.status_code,200)
 
     def test_user_login(self):
-        """ Test user can login into system"""
-        pass
+        """ Test user can login into system and token is generated"""
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        self.assertEqual(res.status_code, 200)
 
     def test_bucketlist_creation(self):
         """Test API can create a new bucket list. """
-        self.bucketlist = {'name': "Join Andela"}
         res = self.client().post("/api/v1/bucketlists/", data=self.bucketlist)
         self.assertEqual(res.status_code, 200)
         res = self.client().post("/api/v1/bucketlists/",data=self.bucketlist_1)
@@ -120,10 +127,10 @@ class BucketlistTestCase(unittest.TestCase):
     def tearDown(self):
         """Teardown all initialized variables."""
         with self.app.app_context():
-            pass
+            # pass
             # drop all tables
-            # db.session.remove()
-            # db.drop_all()
+            db.session.remove()
+            db.drop_all()
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
