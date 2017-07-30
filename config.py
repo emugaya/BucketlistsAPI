@@ -6,6 +6,7 @@ class Config(object):
     """
     DEBUG = False
     TESTING = False
+    SECRET_KEY = 'Some_long_text_here'
     # SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:app'
     SQLALCHEMY_DATABASE_URI = "postgresql://buckelist_db:bucketlist001@localhost/buckelist_db"
 
