@@ -43,8 +43,8 @@ class RegisterAPI(Resource):
     @api.expect(user_registration)
     def post(self):
         """This method is used to register users.
-        :params username: users username
-        :params password: users password
+        :@params username: users username
+        :@params password: users password
         """
         args = parser.parse_args()
         username = args.username.strip()
@@ -71,14 +71,13 @@ class LoginAPI(Resource):
     def post(self):
         """
         This Method Manages User Authentication
-        :params username:
-        :params password:
-        :returns authentication token
+        @params username:
+        @params password:
+        @returns authentication token
         """
         args = parser.parse_args()
         username = args.username
         password = args.password
-        print(username)
         if len(username) == 0:
             return {'message': "Username and password must be supplied"}
         if len(password) == 0:

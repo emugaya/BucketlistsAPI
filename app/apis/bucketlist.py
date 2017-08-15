@@ -5,6 +5,7 @@ from app.models import Bucketlist, Item
 from app import db
 from app.apis.auth import auth
 from datetime import datetime, date
+# from app.apis.parsers import pagination_arguments
 
 # This namespace is used to control CRUD operations for buckets and items
 api = Namespace('bucketlists',
@@ -30,7 +31,7 @@ items_update_field = api.model('BucketlistItemUpdate', {
                             description = "Item name to be Edited"),
                     'done': fields.Boolean(
                             description = 'Status of Item True or False')
-                    })
+                            })
 
 # The parsers below are used to get apylod data from the user
 parser = reqparse.RequestParser()
@@ -41,15 +42,70 @@ parser.add_argument('item_name')
 parser.add_argument('done')
 parser.add_argument('user_id')
 
+bucket_list_items = api.model('Bucketlist', {
+                    'id':fields.Integer(description = "Bucket ID"),
+                    'name': fields.String(
+                            description = "Bucket name"),
+                    'date_created':fields.DateTime,
+                    'date_modified': fields.DateTime,
+                    'created_by': fields.Integer(
+                            description= "User whoc created this bucket")
+                    })
+# ******** Pagination Section **********
+#Set minimum number of items per page
+min_number_of_buckets_per_page = 20
+max_number_of_buckets_per_page = 100
+# Pagination parsers
+pagination_arguments = reqparse.RequestParser()
+pagination_arguments.add_argument('page', type=int, required=False,
+                                    default=1, help='Page number')
+pagination_arguments.add_argument('bool', type=bool, required=False,
+                                    default=1, help='Page number')
+#Set number of results per page
+pagination_arguments.add_argument('per_page', type=int, required=False,
+                            default=20, help='Results per page {error_msg}')
+pagination_arguments.add_argument('search', type=str, required=False, default = ' ')
+
+
+pagination = api.model('A page of results', {
+    'page': fields.Integer(description='Number of this page of results'),
+    'pages': fields.Integer(description='Total number of pages of results'),
+    'per_page': fields.Integer(description='Number of items per page of results'),
+    'total': fields.Integer(description='Total number of results'),
+})
+
+page_of_bucket_lists = api.inherit('Page of blog posts', pagination, {
+    'items': fields.List(fields.Nested(bucket_list_items))
+})
+
 @api.route('/')
 class BucketLists(Resource):
     """This Resource is used to create buckets and lists all buckets"""
     @api.response(200,'Success')
-    @auth.login_required
+    # @auth.login_required
+    @api.expect(pagination_arguments)
+    @api.marshal_with(page_of_bucket_lists)
     def get(self):
         """ This method returns buckets created by an individual user."""
-        bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id).all()
-        return make_response(jsonify([i.serialize for i in bucket_lists]))
+        args = pagination_arguments.parse_args(request)
+        #Set defualt page to be one
+        page = args.get('page', 1)
+        # Get per_page from query string
+        search = args.get('search','')
+        per_page = args.get('per_page', 20)
+
+
+        # Set minimun number of buckets per_page to 20
+        if per_page < min_number_of_buckets_per_page:
+            per_page = min_number_of_buckets_per_page
+        # Set maximum number of items per page to 100
+        if per_page > max_number_of_buckets_per_page:
+            per_page = max_number_of_buckets_per_page
+
+        bucket_lists = Bucketlist.query #.filter(Bucketlist.created_by == g.user.id) #.paginate(1, 3, False)
+        bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
+        return bucket_list_page
+        # return make_response(jsonify([i.serialize for i in bucket_lists]))
 
     @api.response(201, 'Success')
     @api.expect(bucketlist_post)

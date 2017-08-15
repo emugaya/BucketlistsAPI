@@ -4,13 +4,14 @@ from passlib.apps import custom_app_context as pwd_context
 from flask_login import LoginManager, UserMixin
 import jwt
 
-import datetime
+from datetime import datetime
+
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
 
 SECRET_KEY = 'Some_long_text_here'
-class User(db.Model, UserMixin):
+class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
@@ -30,7 +31,7 @@ class User(db.Model, UserMixin):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
-    def generate_auth_token(self, expiration = 600):
+    def generate_auth_token(self, expiration = 6000):
         s = Serializer(SECRET_KEY, expires_in = expiration)
         return s.dumps({ 'id': self.id })
 
