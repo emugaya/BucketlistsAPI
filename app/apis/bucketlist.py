@@ -3,6 +3,7 @@ from flask import request, jsonify, make_response,g
 import json
 from app.models import Bucketlist, Item
 from app import db
+from sqlalchemy import func, Column, Integer, String
 from app.apis.auth import auth
 from datetime import datetime, date
 # from app.apis.parsers import pagination_arguments
@@ -64,7 +65,7 @@ pagination_arguments.add_argument('bool', type=bool, required=False,
 #Set number of results per page
 pagination_arguments.add_argument('per_page', type=int, required=False,
                             default=20, help='Results per page {error_msg}')
-pagination_arguments.add_argument('search', type=str, required=False, default = ' ')
+pagination_arguments.add_argument('search', type=str, required=False, default = '')
 
 
 pagination = api.model('A page of results', {
@@ -82,18 +83,18 @@ page_of_bucket_lists = api.inherit('Page of blog posts', pagination, {
 class BucketLists(Resource):
     """This Resource is used to create buckets and lists all buckets"""
     @api.response(200,'Success')
-    # @auth.login_required
+    @auth.login_required
     @api.expect(pagination_arguments)
     @api.marshal_with(page_of_bucket_lists)
     def get(self):
         """ This method returns buckets created by an individual user."""
         args = pagination_arguments.parse_args(request)
+        print(g.user.id)
         #Set defualt page to be one
         page = args.get('page', 1)
         # Get per_page from query string
         search = args.get('search','')
         per_page = args.get('per_page', 20)
-
 
         # Set minimun number of buckets per_page to 20
         if per_page < min_number_of_buckets_per_page:
@@ -102,7 +103,11 @@ class BucketLists(Resource):
         if per_page > max_number_of_buckets_per_page:
             per_page = max_number_of_buckets_per_page
 
-        bucket_lists = Bucketlist.query #.filter(Bucketlist.created_by == g.user.id) #.paginate(1, 3, False)
+        if len(search) > 0:
+            search = search.lower()
+            bucket_lists = Bucketlist.query.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
+        else:
+            bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id)
         bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
         return bucket_list_page
         # return make_response(jsonify([i.serialize for i in bucket_lists]))
