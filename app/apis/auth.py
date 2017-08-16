@@ -84,15 +84,20 @@ class LoginAPI(Resource):
             return {'message': "Username and password must be supplied"}
         try:
             user = User.query.filter_by(username = username).first()
-            g.user  = user
-            token = g.user.generate_auth_token()
-            if token:
-                responseObject = {
-                         'status': 'success',
+            # password = user.hash_password(password)
+            print(user.verify_password(password))
+            if user.verify_password(password):
+                g.user  = user
+                token = g.user.generate_auth_token()
+                if token:
+                    responseObject = {
+                        'status': 'success',
                          'message': 'Successfully logged in.',
                          'token': token.decode('ascii')
                          }
-                return responseObject, 200
+                    return responseObject, 200
+            else:
+                return {'message': "Username and password must be supplied, or incorrect"}
 
         except:
             return {'error_message': 'Invalid username or password'}, 400
