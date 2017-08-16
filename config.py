@@ -1,4 +1,4 @@
-giimport os
+import os
 
 class Config(object):
     """
