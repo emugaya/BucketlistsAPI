@@ -1,7 +1,9 @@
 from flask import Blueprint, jsonify, request
 from flask_restplus import Api, Resource, fields
+from flask_cors import CORS, cross_origin
 
-# api = Api(blueprint)
+
+# Set up API Blueprint for version V1
 apiv1_blueprint = Blueprint('apiv1', __name__, url_prefix='/api/v1')
 api = Api(apiv1_blueprint, title='Bucket List Application API',version='1.0',
 description="An API to manage bucket lists and their respective items"
