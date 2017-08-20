@@ -13,8 +13,7 @@ db = SQLAlchemy()
 
 def create_app(config_name):
     app = Flask(__name__,instance_relative_config=True)
-    # config_name = os.getenv('APP_SETTINGS')
-    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}},allow_methods=['OPTIONS','GET','POST','PUT','DELETE'])
     app.config.from_object('config')
     app.config.from_object(app_config[config_name])
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
