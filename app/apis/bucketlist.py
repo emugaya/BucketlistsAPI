@@ -91,42 +91,29 @@ class BucketLists(Resource):
     # @cross_origin(origin='*')
     def get(self):
         """ This method returns buckets created by an individual user."""
-        print("beforeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-        print(request)
-        print('afterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
         args = pagination_arguments.parse_args(request)
-        # args = parser.parse_args()
-        print(args)
-        print("__________________________________________________________________________")
-        # print(g.user.id)
         #Set defualt page to be one
-        page = args.get('page', 1)
-        print(page)
+        pge = args.get('page', 1)
         # Get per_page from query string
         search = args.get('search','')
         per_page = args.get('per_page', 20)
-        print("__________________________________________________________________________")
-
+        
         # Set minimun number of buckets per_page to 20
         if per_page < min_number_of_buckets_per_page:
             per_page = min_number_of_buckets_per_page
-            print("__________________________________________________________________________1")
         # Set maximum number of items per page to 100
         if per_page > max_number_of_buckets_per_page:
             per_page = max_number_of_buckets_per_page
-            print("__________________________________________________________________________2")
-
+        
         if len(search) > 0:
             search = search.lower()
             bucket_lists = Bucketlist.query #.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
         else:
             bucket_lists = Bucketlist.query #.filter(Bucketlist.created_by == g.user.id)
-            print("__________________________________________________________________________3")
+        
         bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
-        print("__________________________________________________________________________4")
         return bucket_list_page
-        # return make_response(jsonify([i.serialize for i in bucket_lists]))
-
+        
     @api.response(201, 'Success')
     @api.expect(bucketlist_post)
     @auth.login_required
