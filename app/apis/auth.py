@@ -27,7 +27,7 @@ parser.add_argument('password')
 
 @auth.verify_password
 def verify_password(username_or_token, password):
-    # first try to authenticate by token
+    # Verify Token
     user = User.verify_auth_token(username_or_token)
     if not user:
         # try to authenticate with username/password
@@ -51,18 +51,18 @@ class RegisterAPI(Resource):
         password = args.password.strip()
         try:
             if len(username) == 0:
-                return {'message': "Username and password must be supplied"}
+                return {'error_message': "Username and password must be supplied"}
             if len(password) == 0:
-                return {'message': "Username and password must be supplied"}
+                return {'error_message': "Username and password must be supplied"}
             if User.query.filter_by(username = username).first() is not None:
-                return {'message' : 'User already exists'} # existing user
+                return {'error_message' : 'User already exists'} # existing user
             user = User(username)
             user.hash_password(password)
             db.session.add(user)
             db.session.commit()
             return {'message' : 'user created succesfully'}
         except:
-            return {'error_message':'An error happend during registration'}
+            return {'error_message':'Ooops.. An error happend during registration try again'}
 
 @api.route('/login')
 class LoginAPI(Resource):
@@ -79,9 +79,9 @@ class LoginAPI(Resource):
         username = args.username
         password = args.password
         if len(username) == 0:
-            return {'message': "Username and password must be supplied"}
+            return {'error_message': "Invalid username or password"}
         if len(password) == 0:
-            return {'message': "Username and password must be supplied"}
+            return {'error_message': "Invalid username or password"}
         try:
             user = User.query.filter_by(username = username).first()
             # password = user.hash_password(password)
@@ -97,7 +97,7 @@ class LoginAPI(Resource):
                          }
                     return responseObject, 200
             else:
-                return {'message': "Username and password must be supplied, or incorrect"}
+                return {'error_message': "Invalid username or password"}
 
         except:
-            return {'error_message': 'Invalid username or password'}, 400
+            return {'error_message': 'Invalid username or password'}
