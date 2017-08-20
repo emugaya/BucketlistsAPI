@@ -6,11 +6,13 @@ from app import db
 from sqlalchemy import func, Column, Integer, String
 from app.apis.auth import auth
 from datetime import datetime, date
+from flask_cors import CORS, cross_origin
 # from app.apis.parsers import pagination_arguments
 
 # This namespace is used to control CRUD operations for buckets and items
 api = Namespace('bucketlists',
                 description='Create, Read, Update, Display Buckets and Items')
+# CORS(api) #S,resources={r"/": {"origins": "*"}},allow_headers = ['Content-Type', 'Authorization'])
 
 # This holds the name of bucket being created
 bucketlist_post = api.model('BucketlistPost', {
@@ -86,29 +88,42 @@ class BucketLists(Resource):
     @auth.login_required
     @api.expect(pagination_arguments)
     @api.marshal_with(page_of_bucket_lists)
+    # @cross_origin(origin='*')
     def get(self):
         """ This method returns buckets created by an individual user."""
+        print("beforeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+        print(request)
+        print('afterrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr')
         args = pagination_arguments.parse_args(request)
-        print(g.user.id)
+        # args = parser.parse_args()
+        print(args)
+        print("__________________________________________________________________________")
+        # print(g.user.id)
         #Set defualt page to be one
         page = args.get('page', 1)
+        print(page)
         # Get per_page from query string
         search = args.get('search','')
         per_page = args.get('per_page', 20)
+        print("__________________________________________________________________________")
 
         # Set minimun number of buckets per_page to 20
         if per_page < min_number_of_buckets_per_page:
             per_page = min_number_of_buckets_per_page
+            print("__________________________________________________________________________1")
         # Set maximum number of items per page to 100
         if per_page > max_number_of_buckets_per_page:
             per_page = max_number_of_buckets_per_page
+            print("__________________________________________________________________________2")
 
         if len(search) > 0:
             search = search.lower()
-            bucket_lists = Bucketlist.query.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
+            bucket_lists = Bucketlist.query #.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
         else:
-            bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id)
+            bucket_lists = Bucketlist.query #.filter(Bucketlist.created_by == g.user.id)
+            print("__________________________________________________________________________3")
         bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
+        print("__________________________________________________________________________4")
         return bucket_list_page
         # return make_response(jsonify([i.serialize for i in bucket_lists]))
 
