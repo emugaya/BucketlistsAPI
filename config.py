@@ -10,12 +10,12 @@ class Config(object):
     # SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:app'
     SQLALCHEMY_DATABASE_URI = "postgresql://buckelist_db:bucketlist001@localhost/buckelist_db"
 
-class ProductionConfig(Config):
+class DevelopmentConfig(Config):
 
     SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost/bucketlist_db"
 
 
-class DevelopmentConfig(Config):
+class ProductionConfig(Config):
     """
     Development configurations
     """
