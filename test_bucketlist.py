@@ -39,6 +39,7 @@ class BucketlistTestCase(unittest.TestCase):
         # binds the app to the current context
         self.user_registration = {"username" : "emugaya",
                                   "password" : "Jinja@1234"}
+        self.test = ''
         with self.app.app_context():
             # create all tables
             db.create_all()
@@ -59,11 +60,17 @@ class BucketlistTestCase(unittest.TestCase):
         """ Test user can register a user. """
         res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
         self.assertEqual(res.status_code,200)
+        self.test = 'Uganda'
 
     def test_user_login(self):
         """ Test user can login into system and token is generated"""
+        # res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        # self.assertEqual(res.status_code,200)
         res = self.client().post("/api/v1/auth/login", data=self.user_registration)
         data = json.loads(res.data.decode())
+        print('..................................................................')
+        print (data)
+        self.assertEqual('Uganda',self.test)
         self.token = data['token']
         self.assertEqual(res.status_code, 200)
 
