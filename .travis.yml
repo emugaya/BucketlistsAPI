@@ -1,0 +1,22 @@
+language: python
+
+python:
+  - 3.6
+
+before_install:
+  - pip install -r requirements.txt
+
+services:
+  - postgresql
+
+env:
+  - DATABASE_URI=postgresql://postgres:postgres@localhost/test_db
+
+before_script:
+  - psql -c 'create database bucketlist;' -U postgres
+
+script:
+  - python -m unittest
+
+after_success:
+  - coveralls
