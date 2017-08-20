@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/emugaya/BucketlistsAPI.svg?branch=master)](https://travis-ci.org/emugaya/BucketlistsAPI)
+
 # Bucket Lists Application API
 According to Merriam-Webster Dictionary, a Bucket List is a list of things that one has not done before but wants to do before dying.
 
