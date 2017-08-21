@@ -31,6 +31,8 @@ resources/
 migrations/
 migrations.dev/
 coverage.xml
+tests/test_bucketlist.py
+
 <<<<<<< HEAD
 =======
 
