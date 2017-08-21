@@ -30,6 +30,7 @@ wheels/
 resources/
 migrations/
 migrations.dev/
+coverage.xml
 <<<<<<< HEAD
 =======
 
