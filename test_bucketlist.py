@@ -2,6 +2,8 @@ import unittest
 import os
 import re
 import json
+import base64
+from werkzeug.datastructures import Headers
 from app import create_app, db
 
 class BucketlistTestCase(unittest.TestCase):
@@ -118,60 +120,100 @@ class BucketlistTestCase(unittest.TestCase):
 
     def test_bucketlist_creation(self):
         """Test API can create a new bucket list. """
-        res = self.client().post("/api/v1/bucketlists/", data=self.bucketlist)
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().post("/api/v1/bucketlists/", data=self.bucketlist, headers=headers)
         self.assertEqual(res.status_code, 200)
-        res = self.client().post("/api/v1/bucketlists/",data=self.bucketlist_1)
+        res = self.client().post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=headers)
         self.assertEqual(res.status_code, 200)
-        res = self.client().post("/api/v1/bucketlists/",data=self.bucketlist_2)
+        res = self.client().post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=headers)
         self.assertEqual(res.status_code, 200)
 
-    # def test_listing_all_created_bucket_lists(self):
-    #     """Test API can list buckets created. """
-    #     res= self.client().get('/api/v1/bucketlists/')
-    #     self.assertEqual(res.status_code, 200)
+    def test_listing_all_created_bucket_lists(self):
+        """Test API can list buckets created. """
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res= self.client().get('/api/v1/bucketlists/', headers=headers)
+        self.assertEqual(res.status_code, 200)
 
-    # def test_get_single_bucket_list(self):
-    #     """ Test API return a single bucket list with it's items. """
-    #     res = self.client().get("/api/v1/bucketlists/2")
-    #     self.assertEqual(res.status_code, 200)
+    def test_get_single_bucket_list(self):
+        """ Test API return a single bucket list with it's items. """
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().get("/api/v1/bucketlists/2",headers=headers)
+        self.assertEqual(res.status_code, 200)
 
-    # def test_update_single_bucket_list(self):
-    #     """ Test API can update a single bucket list. """
-    #     res = self.client().put("/api/v1/bucketlists/2", data=self.bucketlist2)
-    #     self.assertEqual(res.status_code, 200)
+    def test_update_single_bucket_list(self):
+        """ Test API can update a single bucket list. """
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().put("/api/v1/bucketlists/2", data=self.bucketlist2, headers=headers)
+        self.assertEqual(res.status_code, 200)
 
 
-    # def test_delete_single_bucket_list(self):
-    #     """ Test API can delete a single bucket list. """
-    #     res = self.client().delete("api/v1/bucketlists/3")
-    #     self.assertEqual(res.status_code,200)
+    def test_delete_single_bucket_list(self):
+        """ Test API can delete a single bucket list. """
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().delete("api/v1/bucketlists/3",headers=headers)
+        self.assertEqual(res.status_code,200)
 
 
-    # def test_create_new_item_in_bucket_list(self):
-    #     """ Test API can create new items in the bucket."""
-    #     res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item1)
-    #     self.assertEqual(res.status_code, 200)
-    #     res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item2)
-    #     self.assertEqual(res.status_code, 200)
-    #     res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item3)
-    #     self.assertEqual(res.status_code, 200)
-    #     res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item4)
-    #     self.assertEqual(res.status_code, 200)
-    #     res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item5)
-    #     self.assertEqual(res.status_code, 200)
+    def test_create_new_item_in_bucket_list(self):
+        """ Test API can create new items in the bucket."""
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item1, headers=headers)
+        self.assertEqual(res.status_code, 200)
+        res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item2, headers=headers)
+        self.assertEqual(res.status_code, 200)
+        res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item3, headers=headers)
+        self.assertEqual(res.status_code, 200)
+        res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item4, headers=headers)
+        self.assertEqual(res.status_code, 200)
+        res = self.client().post("api/v1/bucketlists/2/items",data =self.bucketlist_item5, headers=headers)
+        self.assertEqual(res.status_code, 200)
 
-    # def test_update_a_bucket_list_item(self):
-    #     """ Test API can update items in the bucket list. """
-    #     # Test Update status from False to True
-    #     res = self.client().put("api/v1/bucketlists/2/items/4",data =self.item_update_true)
-    #     self.assertEqual(res.status_code, 200)
-    #     #Test to update item_name
-    #     res = self.client().put("api/v1/bucketlists/2/items/4",data =self.item_name_new)
-    #     self.assertEqual(res.status_code, 200)
+    def test_update_a_bucket_list_item(self):
+        """ Test API can update items in the bucket list. """
+        # Test Update status from False to True
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().put("api/v1/bucketlists/2/items/4",data =self.item_update_true, headers=headers)
+        self.assertEqual(res.status_code, 200)
+        #Test to update item_name
+        res = self.client().put("api/v1/bucketlists/2/items/4",data =self.item_name_new, headers=headers)
+        self.assertEqual(res.status_code, 200)
 
-    # def test_delete_an_item_from_a_bucket_list(self):
-    #     res = self.client().delete("api/v1/bucketlists/2/items/4")
-    #     self.assertEqual(res.status_code, 200)
+    def test_delete_an_item_from_a_bucket_list(self):
+        res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
+        res = self.client().post("/api/v1/auth/login", data=self.user_registration)
+        data = json.loads(res.data.decode())
+        self.token = data['token']
+        headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        res = self.client().delete("api/v1/bucketlists/2/items/4", headers=headers)
+        self.assertEqual(res.status_code, 200)
 
     def tearDown(self):
         """Teardown all initialized variables."""
