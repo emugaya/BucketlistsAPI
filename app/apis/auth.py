@@ -28,6 +28,7 @@ parser.add_argument('password')
 @auth.verify_password
 def verify_password(username_or_token, password):
     # Verify Token
+    # print(username_or_token)
     user = User.verify_auth_token(username_or_token)
     if not user:
         # try to authenticate with username/password
