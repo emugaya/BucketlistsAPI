@@ -93,7 +93,7 @@ class BucketLists(Resource):
         """ This method returns buckets created by an individual user."""
         args = pagination_arguments.parse_args(request)
         #Set defualt page to be one
-        pge = args.get('page', 1)
+        page = args.get('page', 1)
         # Get per_page from query string
         search = args.get('search','')
         per_page = args.get('per_page', 20)
@@ -107,9 +107,9 @@ class BucketLists(Resource):
         
         if len(search) > 0:
             search = search.lower()
-            bucket_lists = Bucketlist.query #.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
+            bucket_lists = Bucketlist.query.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
         else:
-            bucket_lists = Bucketlist.query #.filter(Bucketlist.created_by == g.user.id)
+            bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id)
         
         bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
         return bucket_list_page
