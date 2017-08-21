@@ -1,4 +1,8 @@
 [![Build Status](https://travis-ci.org/emugaya/BucketlistsAPI.svg?branch=master)](https://travis-ci.org/emugaya/BucketlistsAPI)
+[![Codeship Status for emugaya/BucketlistsAPI](https://app.codeship.com/projects/d5ebc4c0-68aa-0135-a28b-5ec5668067cc/status?branch=master)](https://app.codeship.com/projects/241446)
+[![Code Climate](https://codeclimate.com/github/emugaya/BucketlistsAPI/badges/gpa.svg)](https://codeclimate.com/github/emugaya/BucketlistsAPI)
+[![Test Coverage](https://codeclimate.com/github/emugaya/BucketlistsAPI/badges/coverage.svg)](https://codeclimate.com/github/emugaya/BucketlistsAPI/coverage)
+[![Issue Count](https://codeclimate.com/github/emugaya/BucketlistsAPI/badges/issue_count.svg)](https://codeclimate.com/github/emugaya/BucketlistsAPI)
 
 # Bucket Lists Application API
 According to Merriam-Webster Dictionary, a Bucket List is a list of things that one has not done before but wants to do before dying.
