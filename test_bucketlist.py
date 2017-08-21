@@ -53,18 +53,7 @@ class BucketlistTestCase(unittest.TestCase):
             # create all tables
             db.create_all()
 
-    # def test_helloworld(self):
-        """Test API can return hello world"""
-        # rv = self.client().get('/api/v1/hello')
-        # self.assertEqual(rv.status_code, 200)
-        # result_in_json = json.dumps(rv.data.decode('utf-8').replace("'", "\""))
 
-        # result_in_json = result_in_json.replace("\\n","")
-        # result_in_json = result_in_json.replace('\\','')
-
-        # self.assertIn('"hello": "world"', result_in_json)
-        # print(rv.data)
-        # pass
     def test_user_registration_success(self):
         """ Test user can register succesfully. """
         res = self.client().post("/api/v1/auth/register/", data=self.user_registration)
