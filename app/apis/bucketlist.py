@@ -173,16 +173,24 @@ class BucketListView(Resource):
             return {"error_message" : "An errro occured while updating bucketname"}
 
     @auth.login_required
-    def delete(self, bucketlist_id):
+    # @api.doc(params={'bucketlist_id': 'Bucketlist ID'})
+    def delete(self):
         """
         This method is used to delete buckets and there respective items
         :params bucketlist_id: ID of bucket being deleted
         """
-        delete_bucket_list = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
-        if delete_bucket_list:
-            for item in  delete_bucket_list:
-                db.session.delete(item)
+        try:
+            # return {"here" : "Hereherererere"}
+            delete_bucket_list = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
+            # return {"here" : "Hereherererere"}
+            if delete_bucket_list:
+                db.session.delete(delete_bucket_list)
                 db.session.commit()
+                return{"message" : "Bucketlist ID deleted succesfully."}
+                
+        except Exception as e:
+            return {"error_message" : "The Buckelist ID provided doesn't exist ...." + str(e)}
+
 
 @api.route('/<bucketlist_id>/items')
 class BucketListItem(Resource):

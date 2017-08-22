@@ -20,7 +20,7 @@ class User(db.Model):
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
-    buckets= db.relationship('Bucketlist', backref='users', lazy='dynamic')
+    buckets= db.relationship('Bucketlist', backref='users', lazy='dynamic',cascade="save-update, merge, delete")
 
     def __init__(self , username):
         self.username = username
@@ -66,7 +66,7 @@ class Bucketlist(db.Model):
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    items= db.relationship('Item', backref='bucketlists', lazy='dynamic')
+    items= db.relationship('Item', backref='bucketlists', lazy='dynamic',cascade="save-update, merge, delete")
 
     def __init__(self, name, created_by):
         """initialize with name."""
