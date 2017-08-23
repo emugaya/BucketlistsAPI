@@ -270,13 +270,17 @@ class BucketListItems(Resource):
     @auth.login_required
     def  delete(self, bucketlist_id, item_id):
         """
-        This method deletes an item forma bucket list
+        This method deletes an item from a bucket list
         :params bucketlist_id: ID of bucketlist the item will be deleted from
         :params item_id: ID of the item being deleted"""
-        get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
+        get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
         if get_bucket_list_item:
-            single_bucket_list_item = Item.query.filter(Item.id == item_id).all()
+            single_bucket_list_item = Item.query.filter(Item.id == item_id).first()
             if single_bucket_list_item:
-                for item in single_bucket_list_item:
-                    db.session.delete(item)
-                    db.session.commit()
+                db.session.delete(single_bucket_list_item)
+                db.session.commit()
+                return {'message':'Item Deleted succesfully'}
+            else:
+                return {"error_message": "Item Already Deleted"}
+        else:
+           return {'error_message':'The Bucket passed does not exist'}
