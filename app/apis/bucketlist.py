@@ -45,7 +45,7 @@ parser.add_argument('item_name')
 parser.add_argument('done')
 parser.add_argument('user_id')
 
-bucket_list_items = api.model('Bucketlist', {
+bucket_lists = api.model('Bucketlist', {
                     'id':fields.Integer(description = "Bucket ID"),
                     'name': fields.String(
                             description = "Bucket name"),
@@ -54,6 +54,20 @@ bucket_list_items = api.model('Bucketlist', {
                     'created_by': fields.Integer(
                             description= "User whoc created this bucket")
                     })
+bucket_list_items = api.model('BucketListItems', {
+                    'id': fields.Integer(description = "Bucket Item ID"),
+                    'name': fields.String(
+                            description = "Bucketlist Name"),
+                    'done': fields.Boolean( description = "True or False"),
+                    'date_created':fields.DateTime,
+                    'date_modified': fields.DateTime,
+                    'created_by': fields.Integer(
+                            description= "User who created this bucket")
+})
+
+# bucket_list_items_list = api.model(' A list Bucketlist items'),{
+#                     ''
+# })
 # ******** Pagination Section **********
 #Set minimum number of items per page
 min_number_of_buckets_per_page = 20
@@ -78,7 +92,7 @@ pagination = api.model('A page of results', {
 })
 
 page_of_bucket_lists = api.inherit('Page of blog posts', pagination, {
-    'items': fields.List(fields.Nested(bucket_list_items))
+    'items': fields.List(fields.Nested(bucket_lists))
 })
 
 @api.route('/')
@@ -97,23 +111,23 @@ class BucketLists(Resource):
         # Get per_page from query string
         search = args.get('search','')
         per_page = args.get('per_page', 20)
-        
+
         # Set minimun number of buckets per_page to 20
         if per_page < min_number_of_buckets_per_page:
             per_page = min_number_of_buckets_per_page
         # Set maximum number of items per page to 100
         if per_page > max_number_of_buckets_per_page:
             per_page = max_number_of_buckets_per_page
-        
+
         if len(search) > 0:
             search = search.lower()
             bucket_lists = Bucketlist.query.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
         else:
             bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id)
-        
+
         bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
         return bucket_list_page
-        
+
     @api.response(201, 'Success')
     @api.expect(bucketlist_post)
     @auth.login_required
@@ -140,6 +154,7 @@ class BucketLists(Resource):
 class BucketListView(Resource):
     """This Resource displays, edits and deleted as single bucket"""
     @auth.login_required
+    # @api.marshal_with(bucket_list_items)
     def get(self, bucketlist_id):
         """
         This method is used to list details of a bucket and it's items
@@ -147,10 +162,16 @@ class BucketListView(Resource):
         :returns - bucketlist and all it's items
         """
         bucketlist_id = bucketlist_id
-        bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
+        bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
         single_bucket_list_items = Item.query.filter(Item.bucketlist_id == bucketlist_id).all()
         b_item = ([i.serialize for i in single_bucket_list_items])
-        return  make_response(jsonify([i.serialize_id(b_item) for i in bucket_list_item]))
+        results = {'id': bucket_list_item.id,
+                   'name': bucket_list_item.name,
+                   'date_created': bucket_list_item.date_created,
+                   'date_modified': bucket_list_item.date_modified,
+                   'items': b_item
+                   }
+        return  make_response(jsonify(results))
 
     @api.response(204, "Update Successful")
     @api.expect(bucketlist_update)
@@ -174,7 +195,7 @@ class BucketListView(Resource):
 
     @auth.login_required
     # @api.doc(params={'bucketlist_id': 'Bucketlist ID'})
-    def delete(self):
+    def delete(self, bucketlist_id):
         """
         This method is used to delete buckets and there respective items
         :params bucketlist_id: ID of bucket being deleted
@@ -187,7 +208,7 @@ class BucketListView(Resource):
                 db.session.delete(delete_bucket_list)
                 db.session.commit()
                 return{"message" : "Bucketlist ID deleted succesfully."}
-                
+
         except Exception as e:
             return {"error_message" : "The Buckelist ID provided doesn't exist ...." + str(e)}
 
