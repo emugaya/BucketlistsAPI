@@ -163,15 +163,19 @@ class BucketListView(Resource):
         """
         bucketlist_id = bucketlist_id
         bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
-        single_bucket_list_items = Item.query.filter(Item.bucketlist_id == bucketlist_id).all()
-        b_item = ([i.serialize for i in single_bucket_list_items])
-        results = {'id': bucket_list_item.id,
-                   'name': bucket_list_item.name,
-                   'date_created': bucket_list_item.date_created,
-                   'date_modified': bucket_list_item.date_modified,
-                   'items': b_item
-                   }
-        return  make_response(jsonify(results))
+        if bucket_list_item:
+            single_bucket_list_items = Item.query.filter(Item.bucketlist_id == bucketlist_id).all()
+            b_item = ([i.serialize for i in single_bucket_list_items])
+            print(bucket_list_item.id)
+            results = {'id': bucket_list_item.id,
+                       'name': bucket_list_item.name,
+                       'date_created': bucket_list_item.date_created,
+                       'date_modified': bucket_list_item.date_modified,
+                       'items': b_item
+                       }
+            return  make_response(jsonify(results))
+
+        return {"error_message": "bucket doesn't exist"}
 
     @api.response(204, "Update Successful")
     @api.expect(bucketlist_update)
