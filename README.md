@@ -34,18 +34,44 @@ The API has been hosted on Heroku and the link is: https://emugaya-bucketlist.he
 - gunicorn==19.7.1 (Heroku webservice)
 - SQLAlchemy==1.1.11
 - Install requirements using the requirements.txt file
+- Postgres Database version 9.6.4 or later
 
 ### How to clone and run the Application
-1. Clone this Repository.
-2. Create a virtual environment using Python 3.5.2 or later
-3. Install all requirements using pip install requirements.txt
+1. Clone the Repository
+```
+git clone https://github.com/emugaya/BucketlistsAPI.git
+```
+2. Change Directory to the root of the application folder created after cloning and Create a virtual environment using Python 3.5.2 or later
+```
+virtualenv .env
+```
+3. Activate the Virtual environement and install Requirements
+```
+source .env/bin/activate
+pip install -r requirements.txt
+```
 4. Setup your postgress database using the config file provide. You can use any other database of your choice.
-5. Create an an automatic environment variable file and run it. This should have the mode your running the application in
-6. Run the migrations using python3 manage.py db init, python3 manage.py db migrate,python3 manage.py db migrate,
-6. Start the application by running python3 run.py
+Test Database
+```
+create database test_db;
+```
+Development Database
+```
+create database bucketlist_db;
+```
+5. Run Migrations:
+  ```
+  python3 manage.py db init
+  python3 manage.py db migrate
+  python3 manage.py db upgrade
+  python3 manage.py db migrate
 
-
-
-
-
-
+  ```
+6. Test the Application:
+```
+nosetests tests
+```
+6. Activate the Development environment and start the application by running:
+```
+python3 run.py
+```
