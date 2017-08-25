@@ -52,20 +52,20 @@ class RegisterAPI(Resource):
         password = args.password.strip()
         try:
             if len(username) == 0:
-                return {'error_message': "Username and password must be supplied"}
+                return {'message': "Username and password must be supplied"}
             if len(password) == 0:
-                return {'error_message': "Username and password must be supplied"}
+                return {'message': "Username and password must be supplied"}
             if User.query.filter_by(username = username).first() is not None:
-                return {'error_message' : 'User already exists'} # existing user
+                return {'message' : 'User already exists'} # existing user
             user = User(username)
             user.hash_password(password)
             db.session.add(user)
             db.session.commit()
             return {'message' : 'user created succesfully'}
         except:
-            return {'error_message':'Ooops.. An error happend during registration try again'}
+            return {'message':'Ooops.. An error happend during registration try again'}
 
-@api.route('/login')
+@api.route('/login/')
 class LoginAPI(Resource):
     """This resource is used to handle use login"""
     @api.expect(user_registration)
@@ -80,9 +80,9 @@ class LoginAPI(Resource):
         username = args.username
         password = args.password
         if len(username) == 0:
-            return {'error_message': "Invalid username or password"}
+            return {'message': "Invalid username or password"}
         if len(password) == 0:
-            return {'error_message': "Invalid username or password"}
+            return {'message': "Invalid username or password"}
         try:
             user = User.query.filter_by(username = username).first()
             # password = user.hash_password(password)
@@ -98,7 +98,7 @@ class LoginAPI(Resource):
                          }
                     return responseObject, 200
             else:
-                return {'error_message': "Invalid username or password"}
+                return {'message': "Invalid username or password"}
 
         except:
-            return {'error_message': 'Invalid username or password'}
+            return {'message': 'Invalid username or password'}

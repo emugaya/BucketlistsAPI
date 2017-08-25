@@ -25,9 +25,12 @@ bucketlist_update = api.model('BucketlistUpdate', {
                             description = "The Bucketlist Name Update")
                     })
 # This holds names of items being created in a bucket list
-items_post_field = api.model('BucketlistItemPost',{
-                    'name': fields.String(required=True,
-                             description = "Item Name to be added a bucket")})
+items_post_field = api.model('BucketlistItemUpdate', {
+                    'name': fields.String(
+                            description = "Item name to be Edited"),
+                    'done': fields.Boolean(
+                            description = 'Status of Item True or False')
+                            })
 # This holds name and status(done) of bucket list item to be updated                    })
 items_update_field = api.model('BucketlistItemUpdate', {
                     'name': fields.String(
@@ -212,12 +215,13 @@ class BucketListView(Resource):
                 db.session.delete(delete_bucket_list)
                 db.session.commit()
                 return{"message" : "Bucketlist ID deleted succesfully."}
+            return {"error_message": "Bucektlist Doesn't Exist"}
 
         except Exception as e:
             return {"error_message" : "The Buckelist ID provided doesn't exist ...." + str(e)}
 
 
-@api.route('/<bucketlist_id>/items')
+@api.route('/<bucketlist_id>/items/')
 class BucketListItem(Resource):
     """
     This resource is used to manage creating, updating and deleting items from
