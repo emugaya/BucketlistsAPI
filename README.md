@@ -51,12 +51,11 @@ source .env/bin/activate
 pip install -r requirements.txt
 ```
 4. Setup your postgress database using the config file provide. You can use any other database of your choice.
-Test Database
 ```
+###Test Database
 create database test_db;
-```
-Development Database
-```
+
+###Development Database
 create database bucketlist_db;
 ```
 5. Run Migrations:
