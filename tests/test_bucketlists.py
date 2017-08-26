@@ -55,31 +55,43 @@ class BucketlistTestCase(unittest.TestCase):
     def test_bucketlist_creation(self):
         """Test API can create a new bucket list. """
         res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
 
     def test_listing_all_created_bucket_lists(self):
         """Test API can list buckets created. """
+        res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         res= self.client.get('/api/v1/bucketlists/', headers=self.headers)
         self.assertEqual(res.status_code, 200)
 
     def test_get_single_bucket_list(self):
         """ Test API return a single bucket list with it's items. """
+        res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         res = self.client.get("/api/v1/bucketlists/1",headers=self.headers)
         self.assertEqual(res.status_code, 200)
 
     def test_update_single_bucket_list(self):
         """ Test API can update a single bucket list. """
-        res = self.client.put("/api/v1/bucketlists/2", data=self.bucketlist2, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
+        res = self.client.put("/api/v1/bucketlists/1", data=self.bucketlist_1, headers=self.headers)
+        self.assertEqual(res.status_code, 204)
 
-    def test_delete_single_bucket_list(self):
+    def test_delete_single_bucket_lists_(self):
+        res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         """ Test API can delete a single bucket list. """
-        res = self.client.delete("api/v1/bucketlists/3",headers=self.headers)
-        self.assertEqual(res.status_code,200)
+        res = self.client.delete("api/v1/bucketlists/1",headers=self.headers)
+        self.assertEqual(res.status_code,201)
 
     def tearDown(self):
         """Teardown all initialized variables."""

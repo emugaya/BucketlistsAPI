@@ -63,28 +63,39 @@ class BucketlistItemsTestCase(unittest.TestCase):
     def test_create_new_item_in_bucket_list(self):
         """ Test API can create new items in the bucket."""
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item1, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item2, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item3, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item4, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item5, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
 
     def test_update_a_bucket_list_item(self):
         """ Test API can update items in the bucket list. """
         # Test Update status from False to True
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item1, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item2, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item3, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item4, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item5, headers=self.headers)
         res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_true, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 204)
         #Test to update item_name
         res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_name_new, headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 204)
 
     def test_delete_an_item_from_a_bucket_list(self):
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item1, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item2, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item3, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item4, headers=self.headers)
+        res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item5, headers=self.headers)
+        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_true, headers=self.headers)
         res = self.client.delete("api/v1/bucketlists/2/items/4", headers=self.headers)
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
 
     def tearDown(self):
         """Teardown all initialized variables."""
