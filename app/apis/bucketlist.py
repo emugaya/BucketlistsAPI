@@ -31,7 +31,7 @@ items_post_field = api.model('BucketlistItemUpdate', {
                     'done': fields.Boolean(
                             description = 'Status of Item True or False')
                             })
-# This holds name and status(done) of bucket list item to be updated                    })
+# This holds name and status(done) of bucket list item to be updated  })
 items_update_field = api.model('BucketlistItemUpdate', {
                     'name': fields.String(
                             description = "Item name to be Edited"),
@@ -68,10 +68,7 @@ bucket_list_items = api.model('BucketListItems', {
                             description= "User who created this bucket")
 })
 
-# bucket_list_items_list = api.model(' A list Bucketlist items'),{
-#                     ''
-# })
-# ******** Pagination Section **********
+
 #Set minimum number of items per page
 min_number_of_buckets_per_page = 20
 max_number_of_buckets_per_page = 100
@@ -114,7 +111,6 @@ class BucketLists(Resource):
         # Get per_page from query string
         search = args.get('search','')
         per_page = args.get('per_page', 20)
-
         # Set minimun number of buckets per_page to 20
         if per_page < min_number_of_buckets_per_page:
             per_page = min_number_of_buckets_per_page
@@ -129,7 +125,7 @@ class BucketLists(Resource):
             bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id)
 
         bucket_list_page = bucket_lists.paginate(page, per_page, error_out=False)
-        return bucket_list_page
+        return bucket_list_page, 200
 
     @api.response(201, 'Success')
     @api.expect(bucketlist_post)
@@ -141,17 +137,19 @@ class BucketLists(Resource):
         :returns :200 for succesful post
         """
         args = parser.parse_args()
-        name = args.name
+        name = args.name.strip()
         created_by = g.user.id
+        if len(name) == 0:
+            return {"message": "Please provide a name for your bucketlist"}, 405
         try:
             bucket = Bucketlist.query.filter_by(name = name).first()
             if name:
                 bucketlist = Bucketlist(name,created_by)
                 db.session.add(bucketlist)
                 db.session.commit()
-                return({'message': 'Bucket list created Successfully'})
+                return({'message': 'Bucket list created Successfully'}), 201
         except:
-            return {'error_message' : 'Bucket with similar name already exists'}
+            return {'message' : 'Bucket with similar name already exists'}, 400
 
 @api.route('/<bucketlist_id>')
 class BucketListView(Resource):
@@ -165,22 +163,26 @@ class BucketListView(Resource):
         :returns - bucketlist and all it's items
         """
         bucketlist_id = bucketlist_id
-        bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
-        if bucket_list_item:
-            single_bucket_list_items = Item.query.filter(Item.bucketlist_id == bucketlist_id).all()
-            b_item = ([i.serialize for i in single_bucket_list_items])
-            print(bucket_list_item.id)
-            results = {'id': bucket_list_item.id,
-                       'name': bucket_list_item.name,
-                       'date_created': bucket_list_item.date_created,
-                       'date_modified': bucket_list_item.date_modified,
-                       'items': b_item
-                       }
-            return  make_response(jsonify(results))
+        if bucketlist_id:
+            bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
+            if bucket_list_item:
+                single_bucket_list_items = Item.query.filter(Item.bucketlist_id == bucketlist_id).all()
+                b_item = ([i.serialize for i in single_bucket_list_items])
+                # print(b_item)
+                bucketlists = bucket_list_item.serialize
+                print(bucketlists['id'])
 
-        return {"error_message": "bucket doesn't exist"}
+                results = {'id': bucketlists['id'],
+                           'name': bucketlists['name'],
+                           'date_created': bucketlists['date_created'],
+                           'date_modified': bucketlists['date_modified'],
+                           'items': b_item
+                           }
+                return  results, 200
+            return {"message": "Bucket "+bucketlist_id+" Doesn't Exist"}, 404
+        return {"message": "Bucket "+bucketlist_id+" Doesn't Exist"}, 404
 
-    @api.response(204, "Update Successful")
+    # @api.response(204, "Update Successful")
     @api.expect(bucketlist_update)
     @auth.login_required
     def put(self, bucketlist_id):
@@ -196,9 +198,9 @@ class BucketListView(Resource):
                     bucket.name = args.name
                     db.session.add(bucket)
                     db.session.commit()
-                    return({'message': 'Bucket list name updated Successfully'})
+                return({'message': 'Bucket list name updated Successfully'}),204
         except:
-            return {"error_message" : "An errro occured while updating bucketname"}
+            return {"message" : "An error occured while updating bucketname"}
 
     @auth.login_required
     # @api.doc(params={'bucketlist_id': 'Bucketlist ID'})
@@ -214,11 +216,11 @@ class BucketListView(Resource):
             if delete_bucket_list:
                 db.session.delete(delete_bucket_list)
                 db.session.commit()
-                return{"message" : "Bucketlist ID deleted succesfully."}
-            return {"error_message": "Bucektlist Doesn't Exist"}
+                return{"message" : "Bucketlist "+bucketlist_id+" deleted succesfully."}, 201
+            return {"message": "Bucektlist Doesn't Exist"}, 400
 
         except Exception as e:
-            return {"error_message" : "The Buckelist ID provided doesn't exist ...." + str(e)}
+            return {"message" : "The Buckelist "+bucketlist_id+ " provided doesn't exist ...."}, 400
 
 
 @api.route('/<bucketlist_id>/items/')
@@ -244,9 +246,9 @@ class BucketListItem(Resource):
                 new_item = Item(name, bucketlist_id)
                 db.session.add(new_item)
                 db.session.commit()
-                return({'message': 'Item created Successfully'})
+                return({'message': 'Item created Successfully'}), 201
         except:
-            return {"error_message": "item already exits"}
+            return {"message": "item already exits"}, 400
 
 @api.route('/<bucketlist_id>/items/<item_id>')
 class BucketListItems(Resource):
@@ -263,17 +265,18 @@ class BucketListItems(Resource):
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
-                single_bucket_list_item = Item.query.filter(Item.id == item_id).all()
+                print(g.user.id)
+                single_bucket_list_item = Item.query.filter(Item.id == item_id).first()
                 if single_bucket_list_item:
-                    for item in single_bucket_list_item:
-                        item.name = args.name
-                        item.done = args.done
-                        db.session.add(item)
-                        db.session.commit()
-                        return({'message': 'Item Status updated Successfully'})
-
+                    single_bucket_list_item.name = args.name
+                    single_bucket_list_item.done = args.done
+                    db.session.add(single_bucket_list_item)
+                    db.session.commit()
+                    return {'message': 'Item Status updated Successfully'}, 204
+                return {"message":"Item " + item_id + "Doesn't Exist"}
+            return {"message" : "Bucketlist ID "+bucketlist_id +" is incorrect"}, 400
         except:
-            return {"error_message" : "Bucketlist or item ID is incorrect"}
+            return {"message" : "Bucketlist ID "+ bucketlist_id +" is incorrect"}, 400
 
     @auth.login_required
     def  delete(self, bucketlist_id, item_id):
@@ -287,8 +290,8 @@ class BucketListItems(Resource):
             if single_bucket_list_item:
                 db.session.delete(single_bucket_list_item)
                 db.session.commit()
-                return {'message':'Item Deleted succesfully'}
+                return {'message':'Item Deleted succesfully'}, 201
             else:
-                return {"error_message": "Item Already Deleted"}
+                return {"message": "Item Already Deleted"}, 400
         else:
-           return {'error_message':'The Bucket passed does not exist'}
+           return {'message':"The Bucket "+ bucketlist_id+"passed does not exist"}, 400
