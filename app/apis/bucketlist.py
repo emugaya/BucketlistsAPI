@@ -29,14 +29,16 @@ items_post_field = api.model('BucketlistItemUpdate', {
                     'name': fields.String(
                             description = "Item name to be Edited"),
                     'done': fields.Boolean(
-                            description = 'Status of Item True or False')
+                            description = 'Status of Item True or False',
+                            default = "false")
                             })
 # This holds name and status(done) of bucket list item to be updated  })
 items_update_field = api.model('BucketlistItemUpdate', {
                     'name': fields.String(
                             description = "Item name to be Edited"),
                     'done': fields.Boolean(
-                            description = 'Status of Item True or False')
+                            description = 'Status of Item True or False', 
+                            default = "false")
                             })
 
 # The parsers below are used to get apylod data from the user
@@ -268,8 +270,9 @@ class BucketListItems(Resource):
         :return : Returns the message item status updated succesfully
         """
         args = parser.parse_args()
-        name = args.name
-        done = args.done
+        name = args.name.strip()
+        done = args.done.strip()
+        print(name)
         if len(name) == 0:
             return {"message" : "Please Supply Name while editing"}, 405
         if len(done) == 0:
@@ -277,7 +280,6 @@ class BucketListItems(Resource):
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
-                print(g.user.id)
                 single_bucket_list_item = Item.query.filter(Item.id == item_id).first()
                 if single_bucket_list_item:
                     single_bucket_list_item.name = args.name

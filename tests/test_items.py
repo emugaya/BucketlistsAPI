@@ -36,25 +36,25 @@ class BucketlistItemsTestCase(unittest.TestCase):
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         #Bucekt list items
-        self.bucketlist_item1 = {"item_name": "Apply and Pass Plum test",
+        self.bucketlist_item1 = {"name": "Apply and Pass Plum test",
                                  "done": False
                                  }
-        self.bucketlist_item2 = {"item_name": "Take Home Study and Finish Labs",
+        self.bucketlist_item2 = {"name": "Take Home Study and Finish Labs",
                                  "done": False
                                  }
-        self.bucketlist_item3 = {"item_name" : "Complete Self learning Clinic",
+        self.bucketlist_item3 = {"name" : "Complete Self learning Clinic",
                                  "done": False
                                  }
-        self.bucketlist_item4 = {"item_name" : "Complete Bootcamp CP1",
+        self.bucketlist_item4 = {"name" : "Complete Bootcamp CP1",
                                  "done" : False
                                  }
-        self.bucketlist_item5 = {"item_name" : "Complete CP2",
+        self.bucketlist_item5 = {"name" : "Complete CP2",
                                  "done" : False
                                  }
-        #variable for updating item status to True
-        self.item_update_true = {"done" : True}
-        #Variable for updating item name
-        self.item_name_new = {"item_name" : "Complete Bootcamp CP1, Make presentation and Get selected"}
+
+
+        self.item_update_name_new = {"name" : "Complete Bootcamp CP1, Make presentation and Get selected",
+                             "done": True}
 
         with self.app.app_context():
             # create all tables
@@ -81,10 +81,10 @@ class BucketlistItemsTestCase(unittest.TestCase):
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item3, headers=self.headers)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item4, headers=self.headers)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item5, headers=self.headers)
-        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_true, headers=self.headers)
+        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_name_new, headers=self.headers)
         self.assertEqual(res.status_code, 204)
         #Test to update item_name
-        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_name_new, headers=self.headers)
+        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_name_new, headers=self.headers)
         self.assertEqual(res.status_code, 204)
 
     def test_delete_an_item_from_a_bucket_list(self):
@@ -93,7 +93,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item3, headers=self.headers)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item4, headers=self.headers)
         res = self.client.post("api/v1/bucketlists/2/items/",data =self.bucketlist_item5, headers=self.headers)
-        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_true, headers=self.headers)
+        res = self.client.put("api/v1/bucketlists/2/items/4",data =self.item_update_name_new, headers=self.headers)
         res = self.client.delete("api/v1/bucketlists/2/items/4", headers=self.headers)
         self.assertEqual(res.status_code, 201)
 
