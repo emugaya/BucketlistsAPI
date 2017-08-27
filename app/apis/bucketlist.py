@@ -191,7 +191,10 @@ class BucketListView(Resource):
         :params bucketlist_id:
         """
         args = parser.parse_args()
+        name = args.name
         try:
+            if len(name) == 0:
+                return {"message": "Please provide a name for your bucketlist"}, 405
             update_bucket_list_name = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if update_bucket_list_name:
                 for bucket in update_bucket_list_name:
@@ -238,6 +241,9 @@ class BucketListItem(Resource):
         :params bucketlist_id: ID of the bucket that we are creating item for
         """
         args = parser.parse_args()
+        name = args.name
+        if len(name) == 0:
+            return {"message": "Please provide a name for your item"}, 405
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
@@ -262,6 +268,12 @@ class BucketListItems(Resource):
         :return : Returns the message item status updated succesfully
         """
         args = parser.parse_args()
+        name = args.name
+        done = args.done
+        if len(name) == 0:
+            return {"message" : "Please Supply Name while editing"}, 405
+        if len(done) == 0:
+            return {"message" : "Completion status should not be empty, provide True or False, Yes or No"}, 405
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
