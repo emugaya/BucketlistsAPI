@@ -66,7 +66,7 @@ class Bucketlist(db.Model):
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    items= db.relationship('Item', backref='bucketlists', lazy='dynamic', cascade="save-update, merge, delete")
+    items= db.relationship('Item', backref='bucketlists', lazy='joined', cascade="save-update, merge, delete")
 
     def __init__(self, name, created_by):
         """initialize with name."""
