@@ -196,7 +196,7 @@ class BucketListView(Resource):
         name = args.name
         try:
             if len(name) == 0:
-                return {"message": "Please provide a name for your bucketlist"}, 405
+                return {"message": "Please provide a new name for your bucketlist"}, 400
             update_bucket_list_name = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if update_bucket_list_name:
                 for bucket in update_bucket_list_name:
@@ -204,8 +204,9 @@ class BucketListView(Resource):
                     db.session.add(bucket)
                     db.session.commit()
                 return({'message': 'Bucket list name updated Successfully'}),204
+            return {"message" : "The Buckelist "+bucketlist_id + " provided doesn't exist ...."}, 400
         except:
-            return {"message" : "An error occured while updating bucketname"}
+            return {"message" : "An error occured while updating bucketname"},400
 
     @auth.login_required
     # @api.doc(params={'bucketlist_id': 'Bucketlist ID'})
@@ -215,14 +216,12 @@ class BucketListView(Resource):
         :params bucketlist_id: ID of bucket being deleted
         """
         try:
-            # return {"here" : "Hereherererere"}
             delete_bucket_list = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
-            # return {"here" : "Hereherererere"}
             if delete_bucket_list:
                 db.session.delete(delete_bucket_list)
                 db.session.commit()
                 return{"message" : "Bucketlist "+bucketlist_id+" deleted succesfully."}, 201
-            return {"message": "Bucektlist Doesn't Exist"}, 400
+            return {"message": "The Buckelist "+bucketlist_id+ " provided doesn't exist ...."}, 400
 
         except Exception as e:
             return {"message" : "The Buckelist "+bucketlist_id+ " provided doesn't exist ...."}, 400
@@ -235,7 +234,6 @@ class BucketListItem(Resource):
     a bucket.
     """
     @api.expect(items_post_field)
-    @api.response(200, "Successful")
     @auth.login_required
     def post(self, bucketlist_id):
         """
@@ -245,7 +243,7 @@ class BucketListItem(Resource):
         args = parser.parse_args()
         name = args.name
         if len(name) == 0:
-            return {"message": "Please provide a name for your item"}, 405
+            return {"message": "Please provide a name for your item"}, 400
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
@@ -274,9 +272,9 @@ class BucketListItems(Resource):
         done = args.done.strip()
         print(name)
         if len(name) == 0:
-            return {"message" : "Please Supply Name while editing"}, 405
+            return {"message" : "Please Supply Name while editing"}, 400
         if len(done) == 0:
-            return {"message" : "Completion status should not be empty, provide True or False, Yes or No"}, 405
+            return {"message" : "Completion status should not be empty"}, 400
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
@@ -304,8 +302,9 @@ class BucketListItems(Resource):
             if single_bucket_list_item:
                 db.session.delete(single_bucket_list_item)
                 db.session.commit()
-                return {'message':'Item Deleted succesfully'}, 201
+                print("after delete")
+                return {'message':'Item Deleted succesfully'}, 200
             else:
-                return {"message": "Item Already Deleted"}, 400
+                return {"message": "Item " + item_id + " Doesn't Exist"}, 400
         else:
-           return {'message':"The Bucket "+ bucketlist_id+"passed does not exist"}, 400
+           return {'message':"The Bucket "+ bucketlist_id+" passed does not exist"}, 400

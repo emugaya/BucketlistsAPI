@@ -48,22 +48,22 @@ class RegisterAPI(Resource):
         :@params password: users password
         """
         args = parser.parse_args()
-        username = args.username.strip()
-        password = args.password.strip()
+        username = args.username
+        password = args.password
         try:
             if len(username) == 0:
-                return {'message': "Username and password must be supplied"}
+                return {'message': "Username and password must be supplied"},400
             if len(password) == 0:
-                return {'message': "Username and password must be supplied"}
+                return {'message': "Username and password must be supplied"},400
             if User.query.filter_by(username = username).first() is not None:
-                return {'message' : 'User already exists'} # existing user
-            user = User(username)
-            user.hash_password(password)
+                return {'message' : 'User already exists'}, 400
+            user = User(username.strip())
+            user.hash_password(password.strip())
             db.session.add(user)
             db.session.commit()
-            return {'message' : 'user created succesfully'}
+            return {'message' : 'user created succesfully'},200
         except:
-            return {'message':'Ooops.. An error happend during registration try again'}
+            return {'message':'Ooops.. An error happend during registration try again'},400
 
 @api.route('/login/')
 class LoginAPI(Resource):
@@ -80,14 +80,13 @@ class LoginAPI(Resource):
         username = args.username
         password = args.password
         if len(username) == 0:
-            return {'message': "Invalid username or password"}
+            return {'message': "Invalid username or password"}, 400
         if len(password) == 0:
-            return {'message': "Invalid username or password"}
+            return {'message': "Invalid username or password"}, 400
         try:
-            user = User.query.filter_by(username = username).first()
+            user = User.query.filter_by(username = username.strip()).first()
             # password = user.hash_password(password)
-            print(user.verify_password(password))
-            if user.verify_password(password):
+            if user.verify_password(password.strip()):
                 g.user  = user
                 token = g.user.generate_auth_token()
                 if token:
@@ -98,7 +97,7 @@ class LoginAPI(Resource):
                          }
                     return responseObject, 200
             else:
-                return {'message': "Invalid username or password"}
+                return {'message': "Invalid username or password"},400
 
         except:
-            return {'message': 'Invalid username or password'}
+            return {'message': 'Invalid username or password'},400

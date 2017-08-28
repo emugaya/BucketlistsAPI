@@ -24,9 +24,10 @@ class BucketlistTestCase(unittest.TestCase):
         resp = self.client.post("/api/v1/auth/login/", data=self.user_registration)
         data = json.loads(resp.data.decode())
         self.token = data['token']
-        self.headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+"unused").encode('ascii')).decode('ascii')}
+        self.headers={'Authorization': 'Basic ' + base64.b64encode((self.token+":"+\
+                                        "unused").encode('ascii')).decode('ascii')}
 
-
+        self.bucketlist_no_name = {"name":""}
         self.bucketlist = {'name': "Join Andela"}
         self.bucketlist_1 = {"name" :"Join Andela Uganda"}
         self.bucketlist_2 = {"name" : "Attend Orientation and P&C Clinic"}
@@ -52,7 +53,7 @@ class BucketlistTestCase(unittest.TestCase):
         #Variable for updating item name
         self.item_name_new = {"item_name" : "Complete Bootcamp CP1, Make presentation and Get selected"}
 
-    def test_bucketlist_creation(self):
+    def test_bucketlist_creation_succesful(self):
         """Test API can create a new bucket list. """
         res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
         self.assertEqual(res.status_code, 201)
@@ -60,14 +61,24 @@ class BucketlistTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 201)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         self.assertEqual(res.status_code, 201)
+    
+    def test_prevent_creating_bucket_list_with_out_name(self):
+        res =self.client.post("/api/v1/bucketlists/", data=self.bucketlist_no_name, headers=self.headers)
+        data = json.loads(res.data.decode())
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data['message'], "Please provide a name for your bucketlist")
 
-    def test_listing_all_created_bucket_lists(self):
+    def test_listing_all_created_bucket_lists_with_pagination(self):
         """Test API can list buckets created. """
         res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         res= self.client.get('/api/v1/bucketlists/', headers=self.headers)
+        data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['page'], 1)
+        self.assertEqual(data['total'], 3)
+        self.assertEqual(data['pages'], 1)
 
     def test_get_single_bucket_list(self):
         """ Test API return a single bucket list with it's items. """
@@ -77,14 +88,35 @@ class BucketlistTestCase(unittest.TestCase):
         res = self.client.get("/api/v1/bucketlists/1",headers=self.headers)
         self.assertEqual(res.status_code, 200)
 
-    def test_update_single_bucket_list(self):
+    def test_get_no_existing_bucket(self):
+        res = self.client.get("/api/v1/bucketlists/1",headers=self.headers)
+        data = json.loads(res.data.decode())
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['message'],  "Bucket 1 Doesn't Exist")
+
+    def test_editing_single_bucket_list(self):
         """ Test API can update a single bucket list. """
         res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
-        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
-        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         res = self.client.put("/api/v1/bucketlists/1", data=self.bucketlist_1, headers=self.headers)
         self.assertEqual(res.status_code, 204)
+        res = self.client.get("/api/v1/bucketlists/1", headers=self.headers)
+        data = json.loads(res.data.decode())
+        self.assertEqual(data['name'], self.bucketlist_1['name'])
 
+    def test_editing_fails_when_name_is_empty(self):
+        res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
+        res = self.client.put("/api/v1/bucketlists/1", data=self.bucketlist_no_name, headers=self.headers)
+        data = json.loads(res.data.decode())
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['message'], "Please provide a new name for your bucketlist")
+
+    def test_editing_fails_when_non_existing_bucket_id_is_supplied(self):
+        res = self.client.put("/api/v1/bucketlists/1", data=self.bucketlist_2, headers=self.headers)
+        data = json.loads(res.data.decode())
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(data['message'], "The Buckelist 1 provided doesn't exist ....")
+
+        
     def test_delete_single_bucket_lists_(self):
         res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_1,headers=self.headers)
