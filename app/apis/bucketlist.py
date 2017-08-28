@@ -1,9 +1,10 @@
 from flask_restplus import Namespace, Resource, fields, reqparse
 from flask import request, jsonify, make_response,g
 import json
-from app.models import Bucketlist, Item
+from app.models import Bucketlist, Item, dump_datetime
 from app import db
 from sqlalchemy import func, Column, Integer, String
+from sqlalchemy.orm import joinedload
 from app.apis.auth import auth
 from datetime import datetime, date
 from flask_cors import CORS, cross_origin
@@ -164,25 +165,19 @@ class BucketListView(Resource):
         :params bucketlist_id: id of individaual bucket to retrieved from the db
         :returns - bucketlist and all it's items
         """
-        bucketlist_id = bucketlist_id
-        if bucketlist_id:
-            bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
-            if bucket_list_item:
-                single_bucket_list_items = Item.query.filter(Item.bucketlist_id == bucketlist_id).all()
-                b_item = ([i.serialize for i in single_bucket_list_items])
-                # print(b_item)
-                bucketlists = bucket_list_item.serialize
-                print(bucketlists['id'])
-
-                results = {'id': bucketlists['id'],
-                           'name': bucketlists['name'],
-                           'date_created': bucketlists['date_created'],
-                           'date_modified': bucketlists['date_modified'],
-                           'items': b_item
-                           }
-                return  results, 200
+        try:
+            bucketlist_items = Bucketlist.query.options(joinedload(Bucketlist.items)).filter_by(id = bucketlist_id).first()
+            result ={}
+            result['items'] = ([i.serialize for i in bucketlist_items.items])
+            result['date_created'] = dump_datetime(bucketlist_items.date_created)
+            result['date_modified'] = dump_datetime(bucketlist_items.date_modified)
+            result['created_by'] = bucketlist_items.created_by
+            result['name'] = bucketlist_items.name
+            result['id'] = bucketlist_items.id 
+            
+            return result , 200
+        except:
             return {"message": "Bucket "+bucketlist_id+" Doesn't Exist"}, 404
-        return {"message": "Bucket "+bucketlist_id+" Doesn't Exist"}, 404
 
     # @api.response(204, "Update Successful")
     @api.expect(bucketlist_update)
