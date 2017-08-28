@@ -61,12 +61,12 @@ class Bucketlist(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
-    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_created = db.Column(db.DateTime, unique=True, default=db.func.current_timestamp())
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    items= db.relationship('Item', backref='bucketlists', lazy='dynamic',cascade="save-update, merge, delete")
+    items= db.relationship('Item', backref='bucketlists', lazy='dynamic', cascade="save-update, merge, delete")
 
     def __init__(self, name, created_by):
         """initialize with name."""
@@ -106,7 +106,7 @@ class Item(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
-    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_created = db.Column(db.DateTime, unique=True, default=db.func.current_timestamp())
     date_modified = db.Column(
         db.DateTime, default=db.func.current_timestamp(),
         onupdate=db.func.current_timestamp())
