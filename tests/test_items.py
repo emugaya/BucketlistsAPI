@@ -67,6 +67,18 @@ class BucketlistItemsTestCase(unittest.TestCase):
         res = self.client.post("api/v1/bucketlists/1/items/",
                 data =self.bucketlist_item1, headers=self.headers)
         self.assertEqual(res.status_code, 201)
+
+    def test_creating_items_with_same_name_unsuccesful(self):
+        """ Test API can't create Item with similar name."""
+        res = self.client.post("api/v1/bucketlists/1/items/",
+            data =self.bucketlist_item1, headers=self.headers)
+        self.assertEqual(res.status_code, 201)
+        res = self.client.post("api/v1/bucketlists/1/items/",
+            data =self.bucketlist_item1, headers=self.headers)
+        self.assertEqual(res.status_code, 400)
+        data = json.loads(res.data.decode())
+        self.assertEqual(data['message'], "Item with this name already exits")
+
     def test_create_new_item_unsuccesfully_with_no_name(self):
         res = self.client.post("api/v1/bucketlists/1/items/",
                 data =self.bucketlist_item_without_name, headers=self.headers)

@@ -62,6 +62,13 @@ class BucketlistTestCase(unittest.TestCase):
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist_2,headers=self.headers)
         self.assertEqual(res.status_code, 201)
     
+    def test_creating_duplicate_buckets_unsuccesful(self):
+        """Test API can't create duplicate bucketlists. """
+        res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
+        self.assertEqual(res.status_code, 201)
+        res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist,headers=self.headers)
+        self.assertEqual(res.status_code, 400) 
+    
     def test_prevent_creating_bucket_list_with_out_name(self):
         res =self.client.post("/api/v1/bucketlists/", data=self.bucketlist_no_name, headers=self.headers)
         data = json.loads(res.data.decode())
