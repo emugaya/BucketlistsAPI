@@ -254,7 +254,7 @@ class BucketListItem(Resource):
                 db.session.commit()
                 return({'message': 'Item created Successfully'}), 201
         except:
-            return {"message": "item already exits"}, 400
+            return {"message": "Item with this name already exits"}, 400
 
 @api.route('/<bucketlist_id>/items/<item_id>')
 class BucketListItems(Resource):
