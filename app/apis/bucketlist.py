@@ -26,19 +26,11 @@ bucketlist_update = api.model('BucketlistUpdate', {
                             description = "The Bucketlist Name Update")
                     })
 # This holds names of items being created in a bucket list
-items_post_field = api.model('BucketlistItemUpdate', {
+items_fields = api.model('BucketlistItemUpdate', {
                     'name': fields.String(
                             description = "Item name to be Edited"),
                     'done': fields.Boolean(
                             description = 'Status of Item True or False',
-                            default = "false")
-                            })
-# This holds name and status(done) of bucket list item to be updated  })
-items_update_field = api.model('BucketlistItemUpdate', {
-                    'name': fields.String(
-                            description = "Item name to be Edited"),
-                    'done': fields.Boolean(
-                            description = 'Status of Item True or False', 
                             default = "false")
                             })
 
@@ -228,7 +220,7 @@ class BucketListItem(Resource):
     This resource is used to manage creating, updating and deleting items from
     a bucket.
     """
-    @api.expect(items_post_field)
+    @api.expect(items_fields)
     @auth.login_required
     def post(self, bucketlist_id):
         """
@@ -240,20 +232,18 @@ class BucketListItem(Resource):
         if len(name) == 0:
             return {"message": "Please provide a name for your item"}, 400
         try:
-            get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
-            if get_bucket_list_item:
-                name = args.name
-                done = args.done
-                new_item = Item(name, bucketlist_id)
-                db.session.add(new_item)
-                db.session.commit()
-                return({'message': 'Item created Successfully'}), 201
+            name = args.name
+            done = args.done
+            new_item = Item(name, bucketlist_id)
+            db.session.add(new_item)
+            db.session.commit()
+            return({'message': 'Item created Successfully'}), 201
         except:
             return {"message": "Item with this name already exits"}, 400
 
 @api.route('/<bucketlist_id>/items/<item_id>')
 class BucketListItems(Resource):
-    @api.expect(items_update_field)
+    @api.expect(items_fields)
     @auth.login_required
     def put(self, bucketlist_id, item_id):
         """
@@ -266,10 +256,8 @@ class BucketListItems(Resource):
         name = args.name.strip()
         done = args.done.strip()
         print(name)
-        if len(name) == 0:
-            return {"message" : "Please Supply Name while editing"}, 400
-        if len(done) == 0:
-            return {"message" : "Completion status should not be empty"}, 400
+        if len(name) == 0 or len(done) == 0:
+            return {"message" : "Please Supply Name and done status."}, 400
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if get_bucket_list_item:
