@@ -79,9 +79,7 @@ class LoginAPI(Resource):
         args = parser.parse_args()
         username = args.username
         password = args.password
-        if len(username) == 0:
-            return {'message': "Invalid username or password"}, 400
-        if len(password) == 0:
+        if len(username) == 0 or len(password) == 0:
             return {'message': "Invalid username or password"}, 400
         try:
             user = User.query.filter_by(username = username.strip()).first()
@@ -89,15 +87,13 @@ class LoginAPI(Resource):
             if user.verify_password(password.strip()):
                 g.user  = user
                 token = g.user.generate_auth_token()
-                if token:
-                    responseObject = {
-                        'status': 'success',
-                         'message': 'Successfully logged in.',
-                         'token': token.decode('ascii')
+                responseObject = {
+                    'status': 'success',
+                    'message': 'Successfully logged in.',
+                    'token': token.decode('ascii')
                          }
-                    return responseObject, 200
+                return responseObject, 200
             else:
                 return {'message': "Invalid username or password"},400
-
         except:
             return {'message': 'Invalid username or password'},400
