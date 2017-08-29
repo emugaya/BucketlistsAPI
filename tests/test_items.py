@@ -101,7 +101,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
                     data = self.bucketlist_item_without_name, headers=self.headers)
         data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(data['message'], "Please Supply Name while editing")
+        self.assertEqual(data['message'], "Please Supply Name and done status.")
 
     def test_update_item_unsuccesful_with_no_done_status(self):
         """Test API does't Allow Updating Name with empty String"""
@@ -111,7 +111,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
                     data = self.bucketlist_item_without_done, headers=self.headers)
         data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(data['message'], "Completion status should not be empty")
+        self.assertEqual(data['message'], "Please Supply Name and done status.")
 
     def test_delete_an_item_from_a_bucket_list_succesfully(self):
         """ Test API Can Delete Item from Bucket Succesfully"""
