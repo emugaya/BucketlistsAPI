@@ -17,10 +17,10 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True)
     password_hash = db.Column(db.String(128))
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
-    date_modified = db.Column(
-        db.DateTime, default=db.func.current_timestamp(),
-        onupdate=db.func.current_timestamp())
-    buckets= db.relationship('Bucketlist', backref='users', lazy='dynamic',cascade="save-update, merge, delete")
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
+                            onupdate=db.func.current_timestamp())
+    buckets= db.relationship('Bucketlist', backref='users', lazy='dynamic',
+                            cascade="save-update, merge, delete")
 
     def __init__(self , username):
         self.username = username
@@ -54,6 +54,17 @@ def dump_datetime(value):
         return None
     return (value.strftime("%Y-%m-%d") +" "+ value.strftime("%H:%M:%S"))
 
+def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'date_created' : dump_datetime(self.date_created),
+            'date_modified' : dump_datetime(self.date_modified),
+            'created_by' : self.created_by,
+            'done' : self.done
+        }
+
 class Bucketlist(db.Model):
     """This class represents the bucketlist table."""
 
@@ -62,11 +73,11 @@ class Bucketlist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
-    date_modified = db.Column(
-        db.DateTime, default=db.func.current_timestamp(),
-        onupdate=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
+                    onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'))
-    items= db.relationship('Item', backref='bucketlists', lazy='joined', cascade="save-update, merge, delete")
+    items= db.relationship('Item', backref='bucketlists', lazy='joined', 
+                    cascade="save-update, merge, delete")
 
     def __init__(self, name, created_by):
         """initialize with name."""
@@ -82,18 +93,6 @@ class Bucketlist(db.Model):
             'date_created' : dump_datetime(self.date_created),
             'date_modified' : dump_datetime(self.date_modified),
             'created_by' : self.created_by
-        }
-
-    def serialize_id(self, item):
-        """Return object data in easily serializeable format"""
-        #self. item = b_items
-        return {
-            'id' : self.id,
-            'name' : self.name,
-            'items' : item,
-            'date_created' : dump_datetime(self.date_created),
-            'date_modified' : dump_datetime(self.date_modified),
-            'created_by': self.created_by
         }
 
     def __repr__(self):
@@ -117,17 +116,6 @@ class Item(db.Model):
         self.name = name
         self.bucketlist_id = bucketlist_id
         self.done = False
-
-    @property
-    def serialize(self):
-        """Return object data in easily serializeable format"""
-        return {
-            'id' : self.id,
-            'name' : self.name,
-            'date_created' : dump_datetime(self.date_created),
-            'date_modified' : dump_datetime(self.date_modified),
-            'done' : self.done,
-        }
 
     def __repr__(self):
         return "<Item: {}>".format(self.name)
