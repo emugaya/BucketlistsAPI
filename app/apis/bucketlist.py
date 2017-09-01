@@ -160,13 +160,12 @@ class BucketListView(Resource):
         try:
             bucketlist_items = Bucketlist.query.options(joinedload(Bucketlist.items)).filter_by(id = bucketlist_id).first()
             result ={}
-            result['items'] = ([i.serialize for i in bucketlist_items.items])
-            result['date_created'] = dump_datetime(bucketlist_items.date_created)
-            result['date_modified'] = dump_datetime(bucketlist_items.date_modified)
-            result['created_by'] = bucketlist_items.created_by
-            result['name'] = bucketlist_items.name
             result['id'] = bucketlist_items.id 
-            
+            result['name'] = bucketlist_items.name
+            result['created_by'] = bucketlist_items.created_by
+            result['date_modified'] = dump_datetime(bucketlist_items.date_modified)
+            result['date_created'] = dump_datetime(bucketlist_items.date_created)
+            result['items'] = ([i.serialize for i in bucketlist_items.items])
             return result , 200
         except:
             return {"message": "Bucket "+bucketlist_id+" Doesn't Exist"}, 404

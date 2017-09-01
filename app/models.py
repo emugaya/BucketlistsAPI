@@ -119,3 +119,13 @@ class Item(db.Model):
 
     def __repr__(self):
         return "<Item: {}>".format(self.name)
+    @property
+    def serialize(self):
+        """Return object data in easily serializeable format"""
+        return {
+            'id' : self.id,
+            'name' : self.name,
+            'done' : self.done,
+            'date_created' : dump_datetime(self.date_created),
+            'date_modified' : dump_datetime(self.date_modified)
+        }
