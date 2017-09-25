@@ -105,7 +105,7 @@ class BucketLists(Resource):
         page = args.get('page', 1)
         # Get per_page from query string
         search = args.get('search','')
-        per_page = args.get('per_page', 20)
+        per_page = args.get('per_page', 6)
         # Set minimun number of buckets per_page to 20
         if per_page < min_number_of_buckets_per_page:
             per_page = min_number_of_buckets_per_page
@@ -134,15 +134,13 @@ class BucketLists(Resource):
         args = parser.parse_args()
         name = args.name.strip()
         created_by = g.user.id
-        if len(name) == 0:
+        if not name:
             return {"message": "Please provide a name for your bucketlist"}, 405
         try:
-            bucket = Bucketlist.query.filter_by(name = name).first()
-            if name:
-                bucketlist = Bucketlist(name,created_by)
-                db.session.add(bucketlist)
-                db.session.commit()
-                return({'message': 'Bucket list created Successfully'}), 201
+            bucketlist = Bucketlist(name,created_by)
+            db.session.add(bucketlist)
+            db.session.commit()
+            return({'message': 'Bucket list created Successfully'}), 201
         except:
             return {'message' : 'Bucket with similar name already exists'}, 400
 
@@ -180,9 +178,9 @@ class BucketListView(Resource):
         """
         args = parser.parse_args()
         name = args.name
-        try:
-            if len(name) == 0:
+        if not name:
                 return {"message": "Please provide a new name for your bucketlist"}, 400
+        try:
             update_bucket_list_name = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
             if update_bucket_list_name:
                 for bucket in update_bucket_list_name:
@@ -228,7 +226,7 @@ class BucketListItem(Resource):
         """
         args = parser.parse_args()
         name = args.name
-        if len(name) == 0:
+        if not name:
             return {"message": "Please provide a name for your item"}, 400
         try:
             name = args.name
@@ -254,8 +252,7 @@ class BucketListItems(Resource):
         args = parser.parse_args()
         name = args.name.strip()
         done = args.done.strip()
-        print(name)
-        if len(name) == 0 or len(done) == 0:
+        if not name or not done:
             return {"message" : "Please Supply Name and done status."}, 400
         try:
             get_bucket_list_item = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
@@ -284,7 +281,6 @@ class BucketListItems(Resource):
             if single_bucket_list_item:
                 db.session.delete(single_bucket_list_item)
                 db.session.commit()
-                print("after delete")
                 return {'message':'Item Deleted succesfully'}, 200
             else:
                 return {"message": "Item " + item_id + " Doesn't Exist"}, 400
