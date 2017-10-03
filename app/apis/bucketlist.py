@@ -192,7 +192,7 @@ class BucketListView(Resource):
                     bucket.name = args.name
                     db.session.add(bucket)
                     db.session.commit()
-                return {'message' : 'Bucket list name updated Successfully'}, 204
+                return {"message" : "Bucket list name updated Successfully"}, 204
             return {"message" : "The Buckelist "+bucketlist_id + " provided doesn't exist ...."}, 400
         except:
             return {"message" : "An error occured while updating bucketname"}, 400
