@@ -18,17 +18,20 @@ api = Namespace('bucketlists',
 # This holds the name of bucket being created
 bucketlist_post = api.model('BucketlistPost', {
                     'name': fields.String(required=True,
-                            description = "The Bucket List name")
+                            description = "The Bucket List name"),
+                    'description': fields.String(description ="Details about the Bucketlist")
                     })
 # This holds the name of the bucket being updated
 bucketlist_update = api.model('BucketlistUpdate', {
                     'name': fields.String(required=True,
-                            description = "The Bucketlist Name Update")
+                            description = "The Bucketlist Name Update"),
+                    'description': fields.String(description ="Details about the Bucketlist")
                     })
 # This holds names of items being created in a bucket list
 items_fields = api.model('BucketlistItemUpdate', {
                     'name': fields.String(
                             description = "Item name to be Edited"),
+                    'description': fields.String(description= "Item Description"),
                     'done': fields.Boolean(
                             description = 'Status of Item True or False',
                             default = "false")
@@ -47,6 +50,7 @@ bucket_lists = api.model('Bucketlist', {
                     'id':fields.Integer(description = "Bucket ID"),
                     'name': fields.String(
                             description = "Bucket name"),
+                    'description': fields.String(description ="Details about the Bucketlist"),
                     'date_created':fields.DateTime,
                     'date_modified': fields.DateTime,
                     'created_by': fields.Integer(
@@ -56,6 +60,7 @@ bucket_list_items = api.model('BucketListItems', {
                     'id': fields.Integer(description = "Bucket Item ID"),
                     'name': fields.String(
                             description = "Bucketlist Name"),
+                    'description': fields.String(description ="Details about the Item"),
                     'done': fields.Boolean( description = "True or False"),
                     'date_created':fields.DateTime,
                     'date_modified': fields.DateTime,
@@ -115,7 +120,7 @@ class BucketLists(Resource):
 
         if len(search) > 0:
             search = search.lower()
-            bucket_lists = Bucketlist.query.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))#.paginate(1, 3, False)
+            bucket_lists = Bucketlist.query.filter((Bucketlist.created_by == g.user.id),(func.lower(Bucketlist.name).like("%"+search+"%")))
         else:
             bucket_lists = Bucketlist.query.filter(Bucketlist.created_by == g.user.id)
 
@@ -140,7 +145,7 @@ class BucketLists(Resource):
             bucketlist = Bucketlist(name,created_by)
             db.session.add(bucketlist)
             db.session.commit()
-            return({'message': 'Bucket list created Successfully'}), 201
+            return {'message': 'Bucket list created Successfully'}, 201
         except:
             return {'message' : 'Bucket with similar name already exists'}, 400
 
@@ -187,10 +192,10 @@ class BucketListView(Resource):
                     bucket.name = args.name
                     db.session.add(bucket)
                     db.session.commit()
-                return({'message': 'Bucket list name updated Successfully'}),204
+                return {'message' : 'Bucket list name updated Successfully'}, 204
             return {"message" : "The Buckelist "+bucketlist_id + " provided doesn't exist ...."}, 400
         except:
-            return {"message" : "An error occured while updating bucketname"},400
+            return {"message" : "An error occured while updating bucketname"}, 400
 
     @auth.login_required
     # @api.doc(params={'bucketlist_id': 'Bucketlist ID'})
@@ -234,7 +239,7 @@ class BucketListItem(Resource):
             new_item = Item(name, bucketlist_id)
             db.session.add(new_item)
             db.session.commit()
-            return({'message': 'Item created Successfully'}), 201
+            return {'message': 'Item created Successfully'}, 201
         except:
             return {"message": "Item with this name already exits"}, 400
 
