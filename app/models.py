@@ -71,6 +71,7 @@ class Bucketlist(db.Model):
     __tablename__ = 'bucketlists'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
+    description = db.Column(db.String(200))
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(),
                     onupdate=db.func.current_timestamp())
@@ -90,6 +91,7 @@ class Bucketlist(db.Model):
         return {
             'id' : self.id,
             'name' : self.name,
+            'description': self.description,
             'date_created' : dump_datetime(self.date_created),
             'date_modified' : dump_datetime(self.date_modified),
             'created_by' : self.created_by
@@ -105,6 +107,7 @@ class Item(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True )
+    description = db.Column(db.String(200))
     date_created = db.Column(db.DateTime, default = db.func.current_timestamp())
     date_modified = db.Column(
         db.DateTime, default = db.func.current_timestamp(),
@@ -129,6 +132,7 @@ class Item(db.Model):
             'id' : self.id,
             'name' : self.name,
             'done' : self.done,
+            'description': self.description,
             'date_created' : dump_datetime(self.date_created),
             'date_modified' : dump_datetime(self.date_modified)
         }
