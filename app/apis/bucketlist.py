@@ -187,12 +187,13 @@ class BucketListView(Resource):
                 return {"message": "Please provide a new name for your bucketlist"}, 400
         try:
             update_bucket_list_name = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).all()
+            print(update_bucket_list_name)
             if update_bucket_list_name:
                 for bucket in update_bucket_list_name:
                     bucket.name = args.name
                     db.session.add(bucket)
                     db.session.commit()
-                return {"message" : "Bucket list name updated Successfully"}, 204
+                return {"message": "Bucket list name updated Successfully"}, 202
             return {"message" : "The Buckelist "+bucketlist_id + " provided doesn't exist ...."}, 400
         except:
             return {"message" : "An error occured while updating bucketname"}, 400
@@ -268,7 +269,7 @@ class BucketListItems(Resource):
                     single_bucket_list_item.done = args.done
                     db.session.add(single_bucket_list_item)
                     db.session.commit()
-                    return {'message': 'Item Status updated Successfully'}, 204
+                    return {'message': 'Item Status updated Successfully'}, 202
                 return {"message":"Item " + item_id + "Doesn't Exist"}
             return {"message" : "Bucketlist ID "+bucketlist_id +" is incorrect"}, 400
         except:
