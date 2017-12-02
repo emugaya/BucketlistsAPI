@@ -8,7 +8,7 @@ class Config(object):
     TESTING = False
     SECRET_KEY = 'Some_long_text_here'
     # SQLALCHEMY_DATABASE_URI = 'sqlite://:memory:app'
-    SQLALCHEMY_DATABASE_URI = "postgresql://buckelist_db:bucketlist001@localhost/buckelist_db"
+    SQLALCHEMY_DATABASE_URI = "postgresql://postgres:postgres@localhost/buckelist_db"
 
 class DevelopmentConfig(Config):
 
