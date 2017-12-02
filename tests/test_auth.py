@@ -82,7 +82,7 @@ class AuthTestCase(unittest.TestCase):
         res = self.client().post("/api/v1/auth/login/", data=self.wrong_username)
         data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
-        self.assertEqual(data['message'],"Invalid username or password")
+        self.assertEqual(data['message'], "Invalid username provided")
 
     def tearDown(self):
                 """Teardown all initialized variables."""

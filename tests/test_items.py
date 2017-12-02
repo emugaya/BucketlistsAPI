@@ -129,7 +129,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         res = self.client.delete("api/v1/bucketlists/1/items/2", headers=self.headers)
         data = json.loads(res.data.decode())
         self.assertEqual(data["message"], "Item 2 Doesn't Exist")
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 404)
 
     def test_delete_an_item_from_invalid_bucket_unsuccesful(self):
         """ Test Returns 400 Error invalid bucekt_id in request"""
@@ -138,7 +138,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         res = self.client.delete("api/v1/bucketlists/12/items/13", headers=self.headers)
         data = json.loads(res.data.decode())
         self.assertEqual(data["message"], "The Bucket 12 passed does not exist")
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 404)
     
 
     def tearDown(self):
