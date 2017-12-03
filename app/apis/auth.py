@@ -27,11 +27,8 @@ parser.add_argument('password')
 
 @auth.verify_password
 def verify_password(username_or_token, password):
-    # Verify Token
-    # print(username_or_token)
     user = User.verify_auth_token(username_or_token)
     if not user:
-        # try to authenticate with username/password
         user = User.query.filter_by(username = username_or_token).first()
         if not user or not user.verify_password(password):
             return False
@@ -50,20 +47,17 @@ class RegisterAPI(Resource):
         args = parser.parse_args()
         username = args.username
         password = args.password
-        try:
-            if len(username) == 0:
-                return {'message': "Username and password must be supplied"},400
-            if len(password) == 0:
-                return {'message': "Username and password must be supplied"},400
-            if User.query.filter_by(username = username).first() is not None:
-                return {'message' : 'User already exists'}, 400
-            user = User(username.strip())
-            user.hash_password(password.strip())
-            db.session.add(user)
-            db.session.commit()
-            return {'message' : 'user created succesfully'},200
-        except:
-            return {'message':'Ooops.. An error happend during registration try again'},400
+        if not username or not password:
+            return {'message': "Username and password must be supplied"}, 400
+        
+        if User.query.filter_by(username = username).first() is not None:
+            return {'message' : 'User already exists'}, 400
+
+        user = User(username.strip())
+        user.hash_password(password.strip())
+        db.session.add(user)
+        db.session.commit()
+        return {'message' : 'user created succesfully'},200
 
 @api.route('/login/')
 class LoginAPI(Resource):
@@ -79,21 +73,24 @@ class LoginAPI(Resource):
         args = parser.parse_args()
         username = args.username
         password = args.password
-        if len(username) == 0 or len(password) == 0:
+
+        if not username or not password:
             return {'message': "Invalid username or password"}, 400
-        try:
-            user = User.query.filter_by(username = username.strip()).first()
-            # password = user.hash_password(password)
-            if user.verify_password(password.strip()):
-                g.user  = user
-                token = g.user.generate_auth_token()
-                responseObject = {
-                    'status': 'success',
-                    'message': 'Successfully logged in.',
-                    'token': token.decode('ascii')
-                         }
-                return responseObject, 200
-            else:
-                return {'message': "Invalid username or password"},400
-        except:
-            return {'message': 'Invalid username or password'},400
+
+        user = User.query.filter_by(username = username.strip()).first()
+        if not user:
+            return {'message': "Invalid username provided"}, 400
+
+        if not user.verify_password(password.strip()):
+            return {'message': 'Invalid password provided'}
+        
+        g.user  = user
+        token = g.user.generate_auth_token()
+        responseObject = {
+            'status': 'success',
+            'message': 'Successfully logged in.',
+            'token': token.decode('ascii')
+                    }
+        return responseObject, 200
+
+        
