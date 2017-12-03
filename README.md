@@ -23,7 +23,7 @@ The API has been hosted on Heroku and the link is: https://emugaya-bucketlist.he
 | [ DELETE /bucketlists/\<id> ](#) | Delete this single bucket list |
 | [ POST /bucketlists/\<id>/items/ ](#) | Create a new item in bucket list |
 | [ PUT /bucketlists/\<id>/items/<item_id> ](#) | Update a bucket list item |
-| [ DELETE /bucketlists/\<id>/items/<item_id> ](#) | Delete an item in a bucket list |
+| [ DELETE /bucketlists/\<id>/items/<item_id> ](#) | Delete an item from a bucketlist |
 
 
 ### Technology Stack:
@@ -58,6 +58,9 @@ create database test_db;
 ###Development Database
 create database bucketlist_db;
 ```
+Update the `config.py` file with your database settings: `username, password, and database name` for the different environments.
+
+
 5. Run Migrations:
   ```
   python3 manage.py db init

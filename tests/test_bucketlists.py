@@ -120,7 +120,7 @@ class BucketlistTestCase(unittest.TestCase):
     def test_editing_fails_when_non_existing_bucket_id_is_supplied(self):
         res = self.client.put("/api/v1/bucketlists/1", data=self.bucketlist_2, headers=self.headers)
         data = json.loads(res.data.decode())
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 404)
         self.assertEqual(data['message'], "The Buckelist 1 provided doesn't exist ....")
 
         
