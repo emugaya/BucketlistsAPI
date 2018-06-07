@@ -20,10 +20,10 @@ The API has been hosted on Heroku and the link is: https://emugaya-bucketlist.he
 | [ GET /bucketlists/ ](#) | List all the created bucket lists |
 | [ GET /bucketlists/\<id> ](#) | Get single bucket list |
 | [ PUT /bucketlists/\<id> ](#) | Update this bucket list |
-| [ DELETE /bucketlists/\<id> ](#) | Delete this single bucket list |
-| [ POST /bucketlists/\<id>/items/ ](#) | Create a new item in bucket list |
-| [ PUT /bucketlists/\<id>/items/<item_id> ](#) | Update a bucket list item |
-| [ DELETE /bucketlists/\<id>/items/<item_id> ](#) | Delete an item in a bucket list |
+| [ DELETE /bucketlists/\<id> ](#) | Delete single bucket list |
+| [ POST /bucketlists/\<id>/items/ ](#) | Create a new item in bucketlist |
+| [ PUT /bucketlists/\<id>/items/<item_id> ](#) | Update a bucketlist item |
+| [ DELETE /bucketlists/\<id>/items/<item_id> ](#) | Delete an item from a bucketlist |
 
 
 ### Technology Stack:

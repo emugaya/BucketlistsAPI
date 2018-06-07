@@ -67,12 +67,12 @@ class BucketlistTestCase(unittest.TestCase):
         res = self.client.post("/api/v1/bucketlists/", data=self.bucketlist, headers=self.headers)
         self.assertEqual(res.status_code, 201)
         res = self.client.post("/api/v1/bucketlists/",data=self.bucketlist,headers=self.headers)
-        self.assertEqual(res.status_code, 400) 
+        self.assertEqual(res.status_code, 409) 
     
     def test_prevent_creating_bucket_list_with_out_name(self):
         res =self.client.post("/api/v1/bucketlists/", data=self.bucketlist_no_name, headers=self.headers)
         data = json.loads(res.data.decode())
-        self.assertEqual(res.status_code, 405)
+        self.assertEqual(res.status_code, 400)
         self.assertEqual(data['message'], "Please provide a name for your bucketlist")
 
     def test_listing_all_created_bucket_lists_with_pagination(self):

@@ -75,7 +75,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 201)
         res = self.client.post("api/v1/bucketlists/1/items/",
             data =self.bucketlist_item1, headers=self.headers)
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 409)
         data = json.loads(res.data.decode())
         self.assertEqual(data['message'], "Item with this name already exits")
 
@@ -89,7 +89,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         # Test Update status from False to True
         res = self.client.post("api/v1/bucketlists/1/items/",
                     data =self.bucketlist_item1, headers=self.headers)
-        res = self.client.put("api/v1/bucketlists/1/items/1",
+        res = self.client.patch("api/v1/bucketlists/1/items/1",
                     data =self.item_update_name_new, headers=self.headers)
         self.assertEqual(res.status_code, 204)
 
@@ -97,7 +97,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         """Test API does't Allow Updating Name with empty String"""
         res = self.client.post("api/v1/bucketlists/1/items/",
                     data =self.bucketlist_item1, headers=self.headers)
-        res = self.client.put("api/v1/bucketlists/1/items/1", 
+        res = self.client.patch("api/v1/bucketlists/1/items/1", 
                     data = self.bucketlist_item_without_name, headers=self.headers)
         data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
@@ -107,7 +107,7 @@ class BucketlistItemsTestCase(unittest.TestCase):
         """Test API does't Allow Updating Name with empty String"""
         res = self.client.post("api/v1/bucketlists/1/items/",
                     data =self.bucketlist_item1, headers=self.headers)
-        res = self.client.put("api/v1/bucketlists/1/items/1", 
+        res = self.client.patch("api/v1/bucketlists/1/items/1", 
                     data = self.bucketlist_item_without_done, headers=self.headers)
         data = json.loads(res.data.decode())
         self.assertEqual(res.status_code, 400)
