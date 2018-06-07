@@ -1,19 +1,17 @@
 from flask_restplus import Namespace, Resource, fields, reqparse
 from flask import request, jsonify, make_response,g
 import json
-from app.models import Bucketlist, Item, dump_datetime
+from app.models import Bucketlist, dump_datetime
 from app import db
 from sqlalchemy import func, Column, Integer, String
 from sqlalchemy.orm import joinedload
-from app.apis.auth import auth
+from app.routes.auth import auth
 from datetime import datetime, date
 from flask_cors import CORS, cross_origin
-# from app.apis.parsers import pagination_arguments
 
 # This namespace is used to control CRUD operations for buckets and items
 api = Namespace('bucketlists',
                 description='Create, Read, Update, Display Buckets and Items')
-# CORS(api) #S,resources={r"/": {"origins": "*"}},allow_headers = ['Content-Type', 'Authorization'])
 
 # This holds the name of bucket being created
 bucketlist= api.model('BucketlistPost', {
@@ -21,15 +19,6 @@ bucketlist= api.model('BucketlistPost', {
                             description = "The Bucket List name"),
                     'description': fields.String(description ="Details about the Bucketlist")
                     })
-# This holds names of items being created in a bucket list
-items_fields = api.model('BucketlistItemUpdate', {
-                    'name': fields.String(
-                            description = "Item name to be Edited"),
-                    'description': fields.String(description= "Item Description"),
-                    'done': fields.Boolean(
-                            description = 'Status of Item True or False',
-                            default = "false")
-                            })
 
 # The parsers below are used to get apylod data from the user
 parser = reqparse.RequestParser()
@@ -63,20 +52,21 @@ bucket_list_items = api.model('BucketListItems', {
 })
 
 
-#Set minimum number of items per page
+#Constants
 min_number_of_buckets_per_page = 20
 max_number_of_buckets_per_page = 100
+
 # Pagination parsers
 pagination_arguments = reqparse.RequestParser()
 pagination_arguments.add_argument('page', type=int, required=False,
                                     default=1, help='Page number')
 pagination_arguments.add_argument('bool', type=bool, required=False,
                                     default=1, help='Page number')
+
 #Set number of results per page
 pagination_arguments.add_argument('per_page', type=int, required=False,
                             default=20, help='Results per page {error_msg}')
 pagination_arguments.add_argument('search', type=str, required=False, default = '')
-
 
 pagination = api.model('A page of results', {
     'page': fields.Integer(description='Number of this page of results'),
@@ -96,7 +86,6 @@ class BucketLists(Resource):
     @auth.login_required
     @api.expect(pagination_arguments)
     @api.marshal_with(page_of_bucket_lists)
-    # @cross_origin(origin='*')
     def get(self):
         """ This method returns buckets created by an individual user."""
         args = pagination_arguments.parse_args(request)
@@ -146,10 +135,9 @@ class BucketLists(Resource):
         return {'message': 'Bucket list created Successfully'}, 201
 
 @api.route('/<bucketlist_id>')
-class BucketListView(Resource):
+class SingleBucketlist(Resource):
     """This Resource displays, edits and deleted as single bucket"""
     @auth.login_required
-    # @api.marshal_with(bucket_list_items)
     def get(self, bucketlist_id):
         """
         This method is used to list details of a bucket and it's items
@@ -168,7 +156,6 @@ class BucketListView(Resource):
         result['items'] = ([i.serialize for i in bucketlist_items.items])
         return result , 200
 
-    # @api.response(204, "Update Successful")
     @api.expect(bucketlist)
     @auth.login_required
     def put(self, bucketlist_id):
@@ -192,7 +179,6 @@ class BucketListView(Resource):
         return {"message": "Bucket list name updated or changed Successfully"}, 204
 
     @auth.login_required
-    # @api.doc(params={'bucketlist_id': 'Bucketlist ID'})
     def delete(self, bucketlist_id):
         """
         This method is used to delete buckets and there respective items
@@ -206,91 +192,3 @@ class BucketListView(Resource):
         db.session.delete(bucketlist)
         db.session.commit()
         return{"message" : "Bucketlist "+bucketlist_id+" deleted succesfully."}, 201
-
-@api.route('/<bucketlist_id>/items/')
-class BucketListItem(Resource):
-    """
-    This resource is used to manage creating, updating and deleting items from
-    a bucket.
-    """
-    @api.expect(items_fields)
-    @auth.login_required
-    def post(self, bucketlist_id):
-        """
-        This method creates an item in a particular bucket
-        :params bucketlist_id: ID of the bucket that we are creating item for
-        """
-        args = parser.parse_args()
-        name = args.name
-        if not name:
-            return {"message": "Please provide a name for your item"}, 400
-
-        bucketlist = Bucketlist.query.filter_by(id = bucketlist_id)
-        if not bucketlist:
-            return {"message": "Bucketlist Doesn't exist"}, 404
-
-        bucketlist_item = Item.query.filter_by(
-            name=name, bucketlist_id=bucketlist_id).first()
-        if bucketlist_item:
-            return {"message": "Item with this name already exits"}, 400
-
-        name = args.name
-        done = args.done
-        new_item = Item(name, bucketlist_id)
-        db.session.add(new_item)
-        db.session.commit()
-        return {'message': 'Item created Successfully'}, 201
-
-@api.route('/<bucketlist_id>/items/<item_id>')
-class BucketListItems(Resource):
-    @api.expect(items_fields)
-    @auth.login_required
-    def put(self, bucketlist_id, item_id):
-        """
-        This method is used to update the name and status of an item.
-        :params bucketlist_id: ID of bucket that contains the item
-        :params item_id: ID of the item being updated
-        :return : Returns the message item status updated succesfully
-        """
-        args = parser.parse_args()
-        name = args.name.strip()
-        done = args.done.strip()
-        if not name:
-            return {"message" : "Please Supply Name and done status."}, 400
-
-        if not done:
-            return {"message": "Please Supply Name and done status."}, 400
-        
-        bucketlist = Bucketlist.query.filter(
-            Bucketlist.id == bucketlist_id).first()
-
-        if not bucketlist:
-            return {"message": "Bucketlist ID " + bucketlist_id + " is incorrect"}, 404
-        bucketlist_item = Item.query.filter(Item.id == item_id).first()
-
-        if not bucketlist_item:
-            return {"message": "Item " + item_id + "Doesn't Exist"}
-
-        bucketlist_item.name = args.name
-        bucketlist_item.done = args.done
-        db.session.add(bucketlist_item)
-        db.session.commit()
-        return {'message': 'Item Status updated Successfully'}, 204
-
-    @auth.login_required
-    def  delete(self, bucketlist_id, item_id):
-        """
-        This method deletes an item from a bucket list
-        :params bucketlist_id: ID of bucketlist the item will be deleted from
-        :params item_id: ID of the item being deleted"""
-        bucketlist = Bucketlist.query.filter(Bucketlist.id == bucketlist_id).first()
-        if not bucketlist:
-            return {'message': "The Bucket " + bucketlist_id + " passed does not exist"}, 404
-
-        bucketlist_item = Item.query.filter(Item.id == item_id).first()
-        if not bucketlist_item:
-            return {"message": "Item " + item_id + " Doesn't Exist"}, 404
-
-        db.session.delete(bucketlist_item)
-        db.session.commit()
-        return {'message':'Item Deleted succesfully'}, 200
